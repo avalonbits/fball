@@ -21,6 +21,7 @@ package corpus
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"git.cana.pw/avalonbits/fball"
 	"git.cana.pw/avalonbits/fball/client"
@@ -28,13 +29,15 @@ import (
 )
 
 type Corpus struct {
+	logger *log.Logger
 	fballc *client.Client
 	query  *db.Querier
 	insert *db.Inserter
 }
 
-func New(fballc *client.Client, dbs *sql.DB) Corpus {
+func New(fballc *client.Client, logger *log.Logger, dbs *sql.DB) Corpus {
 	return Corpus{
+		logger: logger,
 		fballc: fballc,
 		query:  &db.Querier{DB: dbs},
 		insert: &db.Inserter{DB: dbs},
@@ -42,18 +45,29 @@ func New(fballc *client.Client, dbs *sql.DB) Corpus {
 }
 
 func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
+	// Query the timezone from the dabase.
 	tr, err := c.query.Timezone(ctx, 1, db.Range{})
 	if err != nil {
 		return nil, err
 	}
+
+	// If it's there, there is nothing else to do.
 	if len(tr) != 0 {
 		return tr, nil
 	}
 
+	// No timezone found, let's retrieve it from the api server.
 	tr, err = c.fballc.Timezone()
 	if err != nil {
 		return nil, err
 	}
+
+	if err := c.insert.Timezone(ctx, tr[0]); err != nil {
+		c.logger.Printf("ERROR - unable to write timezone to cache: %v", err)
+	}
+
+	// Ok, so now we can store it back in the database. Note that if storing fails, we still want to
+	// return the data since the db is just a cache.
 
 	return tr, nil
 }

@@ -21,6 +21,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"git.cana.pw/avalonbits/fball"
@@ -92,8 +93,12 @@ func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.Timez
 		}
 
 		for rows.Next() {
+			bytes := []byte{}
 			tr := fball.TimezoneResponse{}
-			if err := rows.Scan(&tr); err != nil {
+			if err := rows.Scan(&bytes); err != nil {
+				return err
+			}
+			if err := json.Unmarshal(bytes, &tr); err != nil {
 				return err
 			}
 			tzResp = append(tzResp, tr)

@@ -21,6 +21,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"git.cana.pw/avalonbits/fball"
 )
@@ -41,7 +42,12 @@ func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) erro
 		}
 		defer stmt.Close()
 
-		res, err := stmt.ExecContext(ctx, fball.EP_Timezone, "", tr.Timestamp, &tr)
+		blob, err := json.Marshal(tr)
+		if err != nil {
+			return err
+		}
+
+		res, err := stmt.ExecContext(ctx, fball.EP_Timezone, "", tr.Timestamp, blob)
 		if err != nil {
 			return err
 		}

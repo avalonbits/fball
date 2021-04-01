@@ -90,7 +90,7 @@ func (c *Client) get(data response, endpoint string, params map[string]string) e
 		url += strings.Join(pList, "&")
 	}
 
-	log.Println("GET", url)
+	c.logger.Println("GET", url)
 	c.limit.Take()
 
 	req, err := http.NewRequest("GET", url, nil)

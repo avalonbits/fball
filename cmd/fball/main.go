@@ -50,9 +50,11 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	defer DB.Close()
 
 	c := corpus.New(
 		client.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
+		logger,
 		DB,
 	)
 
