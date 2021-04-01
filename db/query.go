@@ -69,6 +69,10 @@ const (
 )
 
 func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
+	if q == nil || q.DB == nil {
+		return nil, nil
+	}
+
 	if max < 1 {
 		max = 1
 	}

@@ -19,6 +19,7 @@
 package corpus
 
 import (
+	"context"
 	"database/sql"
 
 	"git.cana.pw/avalonbits/fball"
@@ -27,17 +28,32 @@ import (
 )
 
 type Corpus struct {
-	client *client.Client
+	fballc *client.Client
 	query  *db.Querier
 	insert *db.Inserter
 }
 
-func NewCorpus(client *client.Client, db *sql.DB) Corpus {
+func New(fballc *client.Client, dbs *sql.DB) Corpus {
 	return Corpus{
-		client: client,
+		fballc: fballc,
+		query:  &db.Querier{DB: dbs},
+		insert: &db.Inserter{DB: dbs},
 	}
 }
 
-func (c Corpus) Timezone() ([]fball.TimezoneResponse, error) {
-	return nil, nil
+func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
+	tr, err := c.query.Timezone(ctx, 1, db.Range{})
+	if err != nil {
+		return nil, err
+	}
+	if len(tr) != 0 {
+		return tr, nil
+	}
+
+	tr, err = c.fballc.Timezone()
+	if err != nil {
+		return nil, err
+	}
+
+	return tr, nil
 }

@@ -19,6 +19,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ import (
 	"time"
 
 	"git.cana.pw/avalonbits/fball/client"
+	"git.cana.pw/avalonbits/fball/corpus"
 	"github.com/kr/pretty"
 	"go.uber.org/ratelimit"
 )
@@ -40,9 +42,13 @@ func main() {
 
 	logger := log.New(os.Stderr, "fball - ", log.LstdFlags|log.Lshortfile)
 	limit := ratelimit.New(10, ratelimit.Per(time.Minute))
-	c := client.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger)
+	c := corpus.New(
+		client.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
+		nil,
+	)
 
-	tr, err := c.Timezone()
+	ctx := context.Background()
+	tr, err := c.Timezone(ctx)
 	if err != nil {
 		logger.Fatal(err)
 	}
