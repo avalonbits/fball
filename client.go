@@ -64,13 +64,14 @@ type limiter interface {
 	Take() time.Time
 }
 
-type errer interface {
+type response interface {
 	Err() error
+	When(int64)
 }
 
 const base = "https://v3.football.api-sports.io"
 
-func (c *Client) get(data errer, endpoint string, params map[string]string) error {
+func (c *Client) get(data response, endpoint string, params map[string]string) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
@@ -96,6 +97,7 @@ func (c *Client) get(data errer, endpoint string, params map[string]string) erro
 		return err
 	}
 
+	now := time.Now().UTC().UnixNano()
 	req.Header.Set("X-RapidAPI-Key", c.key)
 	resp, err := c.doer.Do(req)
 	if err != nil {
@@ -108,6 +110,7 @@ func (c *Client) get(data errer, endpoint string, params map[string]string) erro
 	if err := dec.Decode(data); err != nil {
 		return err
 	}
+	data.When(now)
 
 	return data.Err()
 }

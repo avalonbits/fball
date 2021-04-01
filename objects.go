@@ -37,6 +37,11 @@ type CommonResponse struct {
 	Errors     interface{} `json:"errors"`
 	Results    int         `json:"results"`
 	Paging     PagingToken `json:"paging"`
+	Timestamp  int64
+}
+
+func (cr CommonResponse) When(timestamp int64) {
+	cr.Timestamp = timestamp
 }
 
 func (cr CommonResponse) Err() error {
