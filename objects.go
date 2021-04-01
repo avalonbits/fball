@@ -40,7 +40,7 @@ type CommonResponse struct {
 	Timestamp  int64
 }
 
-func (cr CommonResponse) When(timestamp int64) {
+func (cr *CommonResponse) When(timestamp int64) {
 	cr.Timestamp = timestamp
 }
 

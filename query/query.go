@@ -23,17 +23,24 @@ type Range struct {
 	Earliest time.Time
 }
 
-var noParamQuery = `
-SELECT Response, Timestamp from RequestCache
-	WHERE
-		Endpoint = ?
-	ORDER BY
-		Timestamp DESC
-	LIMIT ?;
-`
+func (r Range) UnixNano() (top, bottom int64) {
+	if r.Latest.IsZero() {
+		top = time.Now().UTC().UnixNano()
+	} else {
+		top = r.Latest.UTC().UnixNano()
+	}
+	if !r.Earliest.IsZero() {
+		bottom = r.Earliest.UTC().UnixNano()
+	}
+	return
+}
 
-var rangeNoParamQuery = `
-SELECT Response, Timestamp from RequestCache
+func (r Range) IsZero() bool {
+	return r.Latest.IsZero() && r.Earliest.IsZero()
+}
+
+var noParamQuery = `
+SELECT Response from RequestCache
 	WHERE
 		Endpoint = ?
 		AND
@@ -45,22 +52,35 @@ SELECT Response, Timestamp from RequestCache
 	LIMIT ?
 `
 
-func (h *Handler) Timezone(ctx context.Context, max int, r *Range) ([]fball.TimezoneResponse, error) {
+const (
+	timezoneEP = "/timezone"
+)
+
+func (h *Handler) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
 	if max < 1 {
 		max = 1
 	}
 
-	tr := []fball.TimezoneResponse{}
+	tzResp := []fball.TimezoneResponse{}
 	err := h.transact(ctx, func(tx *sql.Tx) error {
-		if r == nil || (r.Latest.IsZero() && r.Earliest.IsZero()) {
-			stmt, err := tx.PrepareContext(ctx, noParamQuery)
-			if err != nil {
+		stmt, err := tx.PrepareContext(ctx, noParamQuery)
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+
+		top, bottom := r.UnixNano()
+		rows, err := stmt.QueryContext(ctx, fball.EP_Timezone, top, bottom, max)
+		if err != nil {
+			return err
+		}
+
+		for rows.Next() {
+			tr := fball.TimezoneResponse{}
+			if err := rows.Scan(&tr); err != nil {
 				return err
 			}
-			res, err := stmt.Exec(ctx, max)
-			if err != nil {
-				return err
-			}
+			tzResp = append(tzResp, tr)
 		}
 		return nil
 	})
@@ -68,7 +88,7 @@ func (h *Handler) Timezone(ctx context.Context, max int, r *Range) ([]fball.Time
 	if err != nil {
 		return nil, err
 	}
-	return tr, nil
+	return tzResp, nil
 }
 
 func (h *Handler) transact(ctx context.Context, fn func(*sql.Tx) error) (dberr error) {

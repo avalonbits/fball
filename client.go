@@ -24,13 +24,16 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 )
 
 type Doer interface {
 	Do(*http.Request) (*http.Response, error)
+}
+
+type limiter interface {
+	Take() time.Time
 }
 
 type Client struct {
@@ -52,16 +55,12 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 	}
 }
 
-func (c *Client) Timezone() (TimezoneResponse, error) {
+func (c *Client) Timezone() ([]TimezoneResponse, error) {
 	tr := TimezoneResponse{}
 	if err := c.get(&tr, "/timezone", nil); err != nil {
-		return TimezoneResponse{}, err
+		return nil, err
 	}
-	return tr, nil
-}
-
-type limiter interface {
-	Take() time.Time
+	return []TimezoneResponse{tr}, nil
 }
 
 type response interface {
@@ -79,7 +78,7 @@ func (c *Client) get(data response, endpoint string, params map[string]string) e
 		return fmt.Errorf("invalid endpoint: empty string")
 	}
 
-	url := path.Join(base, endpoint)
+	url := base + endpoint
 	if len(params) > 0 {
 		url += "?"
 		pList := make([]string, 0, len(params))
