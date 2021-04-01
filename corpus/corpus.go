@@ -16,30 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package db
+package corpus
 
 import (
-	"context"
 	"database/sql"
+
+	"git.cana.pw/avalonbits/fball"
+	"git.cana.pw/avalonbits/fball/client"
+	"git.cana.pw/avalonbits/fball/db"
 )
 
-func transact(ctx context.Context, db *sql.DB, fn func(*sql.Tx) error) (dberr error) {
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
+type Corpus struct {
+	client *client.Client
+	query  *db.Querier
+	insert *db.Inserter
+}
+
+func NewCorpus(client *client.Client, db *sql.DB) Corpus {
+	return Corpus{
+		client: client,
 	}
+}
 
-	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			panic(p)
-		} else if dberr != nil {
-			tx.Rollback()
-		} else {
-			dberr = tx.Commit()
-		}
-	}()
-
-	dberr = fn(tx)
-	return
+func (c Corpus) Timezone() ([]fball.TimezoneResponse, error) {
+	return nil, nil
 }

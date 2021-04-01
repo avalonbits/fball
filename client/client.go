@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fball
+package client
 
 import (
 	"encoding/json"
@@ -26,6 +26,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"git.cana.pw/avalonbits/fball"
 )
 
 type Doer interface {
@@ -55,12 +57,12 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 	}
 }
 
-func (c *Client) Timezone() ([]TimezoneResponse, error) {
-	tr := TimezoneResponse{}
+func (c *Client) Timezone() ([]fball.TimezoneResponse, error) {
+	tr := fball.TimezoneResponse{}
 	if err := c.get(&tr, "/timezone", nil); err != nil {
 		return nil, err
 	}
-	return []TimezoneResponse{tr}, nil
+	return []fball.TimezoneResponse{tr}, nil
 }
 
 type response interface {
