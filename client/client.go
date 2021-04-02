@@ -72,18 +72,18 @@ type CountryParams struct {
 	Search string
 }
 
-func (cp CountryParams) ToMap() map[string]string {
-	m := map[string]string{}
+func (cp CountryParams) URLQueryString() string {
+	strs := []string{}
 	if cp.Name != "" {
-		m["name"] = cp.Name
+		strs = append(strs, "name="+template.URLQueryEscaper(cp.Name))
 	}
 	if cp.Code != "" {
-		m["code"] = cp.Code
+		strs = append(strs, "code="+template.URLQueryEscaper(cp.Code))
 	}
 	if cp.Search != "" {
-		m["search"] = cp.Search
+		strs = append(strs, "search="+template.URLQueryEscaper(cp.Search))
 	}
-	return m
+	return strings.Join(strs, "&")
 }
 
 func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryResponse, error) {
@@ -101,11 +101,11 @@ type response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-type toMapper interface {
-	ToMap() map[string]string
+type urlQueryStringer interface {
+	URLQueryString() string
 }
 
-func (c *Client) get(ctx context.Context, data response, endpoint string, mapper toMapper) error {
+func (c *Client) get(ctx context.Context, data response, endpoint string, params urlQueryStringer) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
@@ -114,14 +114,10 @@ func (c *Client) get(ctx context.Context, data response, endpoint string, mapper
 	}
 
 	url := base + endpoint
-	params := mapper.ToMap()
-	if len(params) > 0 {
+	qstr := params.URLQueryString()
+	if qstr != "" {
 		url += "?"
-		pList := make([]string, 0, len(params))
-		for k, v := range params {
-			pList = append(pList, template.URLQueryEscaper(k)+"="+template.URLQueryEscaper(v))
-		}
-		url += strings.Join(pList, "&")
+		url += qstr
 	}
 
 	c.logger.Println("GET", url)

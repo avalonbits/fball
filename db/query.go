@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"git.cana.pw/avalonbits/fball"
+	"git.cana.pw/avalonbits/fball/client"
 )
 
 type Querier struct {
@@ -64,10 +65,6 @@ SELECT Response from RequestCache
 		Timestamp DESC
 	LIMIT ?
 `
-
-const (
-	timezoneEP = "/timezone"
-)
 
 func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
 	if q == nil || q.DB == nil {
@@ -110,4 +107,16 @@ func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.Timez
 		return nil, err
 	}
 	return tzResp, nil
+}
+
+func (q *Querier) Country(
+	ctx context.Context, params client.CountryParams, max int, r Range) ([]fball.CountryResponse, error) {
+	if q == nil || q.DB == nil {
+		return nil, nil
+	}
+
+	if max < 1 {
+		max = 1
+	}
+	return nil, nil
 }
