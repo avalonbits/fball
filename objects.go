@@ -31,6 +31,18 @@ type TimezoneResponse struct {
 	Timezone []string `json:"response"`
 }
 
+type CountryResponse struct {
+	CommonResponse
+
+	Country []Country `json:"response"`
+}
+
+type Country struct {
+	Name string `json:"name"`
+	Code string `json:"code"`
+	Flag string `json:"flag"`
+}
+
 type CommonResponse struct {
 	Get        string      `json:"get"`
 	Parameters interface{} `json:"parameters"`
