@@ -71,3 +71,7 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 
 	return tr, nil
 }
+
+func (c Corpus) Country(ctx context.Context) ([]fball.CountryResponse, error) {
+	return c.fballc.Country()
+}
