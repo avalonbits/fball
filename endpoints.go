@@ -19,5 +19,6 @@
 package fball
 
 const (
-	EP_Timezone = "/timezone"
+	EP_Timezone  = "/timezone"
+	EP_Countries = "/countries"
 )

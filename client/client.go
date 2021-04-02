@@ -59,10 +59,18 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 
 func (c *Client) Timezone() ([]fball.TimezoneResponse, error) {
 	tr := fball.TimezoneResponse{}
-	if err := c.get(&tr, "/timezone", nil); err != nil {
+	if err := c.get(&tr, fball.EP_Timezone, nil); err != nil {
 		return nil, err
 	}
 	return []fball.TimezoneResponse{tr}, nil
+}
+
+func (c *Client) Country() ([]fball.CountryResponse, error) {
+	cr := fball.CountryResponse{}
+	if err := c.get(&cr, fball.EP_Countries, nil); err != nil {
+		return nil, err
+	}
+	return []fball.CountryResponse{cr}, nil
 }
 
 type response interface {
