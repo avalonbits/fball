@@ -57,7 +57,7 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 	}
 
 	// No timezone found, let's retrieve it from the api server.
-	tr, err = c.fballc.Timezone()
+	tr, err = c.fballc.Timezone(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,5 +73,5 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 }
 
 func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.CountryResponse, error) {
-	return c.fballc.Country(cp)
+	return c.fballc.Country(ctx, cp)
 }

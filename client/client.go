@@ -19,6 +19,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -57,9 +58,9 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 	}
 }
 
-func (c *Client) Timezone() ([]fball.TimezoneResponse, error) {
+func (c *Client) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
 	tr := fball.TimezoneResponse{}
-	if err := c.get(&tr, fball.EP_Timezone, nil); err != nil {
+	if err := c.get(ctx, &tr, fball.EP_Timezone, nil); err != nil {
 		return nil, err
 	}
 	return []fball.TimezoneResponse{tr}, nil
@@ -85,9 +86,9 @@ func (cp CountryParams) ToMap() map[string]string {
 	return m
 }
 
-func (c *Client) Country(p CountryParams) ([]fball.CountryResponse, error) {
+func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryResponse, error) {
 	cr := fball.CountryResponse{}
-	if err := c.get(&cr, fball.EP_Countries, p); err != nil {
+	if err := c.get(ctx, &cr, fball.EP_Countries, p); err != nil {
 		return nil, err
 	}
 	return []fball.CountryResponse{cr}, nil
@@ -104,7 +105,7 @@ type toMapper interface {
 	ToMap() map[string]string
 }
 
-func (c *Client) get(data response, endpoint string, mapper toMapper) error {
+func (c *Client) get(ctx context.Context, data response, endpoint string, mapper toMapper) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
@@ -126,7 +127,7 @@ func (c *Client) get(data response, endpoint string, mapper toMapper) error {
 	c.logger.Println("GET", url)
 	c.limit.Take()
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}
