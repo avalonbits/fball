@@ -52,8 +52,12 @@ type CommonResponse struct {
 	Timestamp  int64
 }
 
-func (cr *CommonResponse) When(timestamp int64) {
+func (cr *CommonResponse) SetWhen(timestamp int64) {
 	cr.Timestamp = timestamp
+}
+
+func (cr CommonResponse) When() int64 {
+	return cr.Timestamp
 }
 
 func (cr CommonResponse) Err() error {

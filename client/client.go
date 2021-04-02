@@ -96,7 +96,7 @@ func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryR
 
 type response interface {
 	Err() error
-	When(int64)
+	SetWhen(int64)
 }
 
 const base = "https://v3.football.api-sports.io"
@@ -141,7 +141,7 @@ func (c *Client) get(ctx context.Context, data response, endpoint string, params
 	if err := dec.Decode(data); err != nil {
 		return err
 	}
-	data.When(now)
+	data.SetWhen(now)
 
 	return data.Err()
 }

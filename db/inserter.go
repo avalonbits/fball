@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 
 	"git.cana.pw/avalonbits/fball"
+	"git.cana.pw/avalonbits/fball/client"
 )
 
 type Inserter struct {
@@ -35,6 +36,22 @@ INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
 func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) error {
+	return i.insert(ctx, tr, nil)
+}
+
+func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp client.CountryParams) error {
+	return i.insert(ctx, cr, cp)
+}
+
+type response interface {
+	When() int64
+}
+
+type urlQueryStringer interface {
+	URLQueryString() string
+}
+
+func (i *Inserter) insert(ctx context.Context, data response, params urlQueryStringer) error {
 	return transact(ctx, i.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
@@ -42,18 +59,21 @@ func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) erro
 		}
 		defer stmt.Close()
 
-		blob, err := json.Marshal(tr)
+		blob, err := json.Marshal(data)
 		if err != nil {
 			return err
 		}
 
-		res, err := stmt.ExecContext(ctx, fball.EP_Timezone, "", tr.Timestamp, blob)
+		var urlqp string
+		if params != nil {
+			urlqp = params.URLQueryString()
+		}
+		res, err := stmt.ExecContext(ctx, fball.EP_Countries, urlqp, data.When(), blob)
 		if err != nil {
 			return err
 		}
-		if _, err := res.RowsAffected(); err != nil {
-			return err
-		}
-		return nil
+		_, err = res.RowsAffected()
+		return err
+
 	})
 }
