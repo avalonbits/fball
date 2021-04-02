@@ -60,7 +60,7 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 
 func (c *Client) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
 	tr := fball.TimezoneResponse{}
-	if err := c.get(ctx, &tr, fball.EP_Timezone, nil); err != nil {
+	if err := c.get(ctx, &tr, fball.EP_Timezone, noParam{}); err != nil {
 		return nil, err
 	}
 	return []fball.TimezoneResponse{tr}, nil
@@ -103,6 +103,12 @@ const base = "https://v3.football.api-sports.io"
 
 type urlQueryStringer interface {
 	URLQueryString() string
+}
+
+type noParam struct{}
+
+func (np noParam) URLQueryString() string {
+	return ""
 }
 
 func (c *Client) get(ctx context.Context, data response, endpoint string, params urlQueryStringer) error {

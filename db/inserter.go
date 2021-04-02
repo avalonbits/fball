@@ -35,12 +35,18 @@ var insertSQL = `
 INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
+type noParam struct{}
+
+func (np noParam) URLQueryString() string {
+	return ""
+}
+
 func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) error {
-	return i.insert(ctx, tr, nil)
+	return i.insert(ctx, fball.EP_Timezone, tr, noParam{})
 }
 
 func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp client.CountryParams) error {
-	return i.insert(ctx, cr, cp)
+	return i.insert(ctx, fball.EP_Countries, cr, cp)
 }
 
 type response interface {
@@ -51,7 +57,7 @@ type urlQueryStringer interface {
 	URLQueryString() string
 }
 
-func (i *Inserter) insert(ctx context.Context, data response, params urlQueryStringer) error {
+func (i *Inserter) insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
 	return transact(ctx, i.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
@@ -64,11 +70,7 @@ func (i *Inserter) insert(ctx context.Context, data response, params urlQueryStr
 			return err
 		}
 
-		var urlqp string
-		if params != nil {
-			urlqp = params.URLQueryString()
-		}
-		res, err := stmt.ExecContext(ctx, fball.EP_Countries, urlqp, data.When(), blob)
+		res, err := stmt.ExecContext(ctx, endpoint, params.URLQueryString(), data.When(), blob)
 		if err != nil {
 			return err
 		}
