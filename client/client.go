@@ -65,9 +65,29 @@ func (c *Client) Timezone() ([]fball.TimezoneResponse, error) {
 	return []fball.TimezoneResponse{tr}, nil
 }
 
-func (c *Client) Country() ([]fball.CountryResponse, error) {
+type CountryParams struct {
+	Name   string
+	Code   string
+	Search string
+}
+
+func (cp CountryParams) ToMap() map[string]string {
+	m := map[string]string{}
+	if cp.Name != "" {
+		m["name"] = cp.Name
+	}
+	if cp.Code != "" {
+		m["code"] = cp.Code
+	}
+	if cp.Search != "" {
+		m["search"] = cp.Search
+	}
+	return m
+}
+
+func (c *Client) Country(p CountryParams) ([]fball.CountryResponse, error) {
 	cr := fball.CountryResponse{}
-	if err := c.get(&cr, fball.EP_Countries, nil); err != nil {
+	if err := c.get(&cr, fball.EP_Countries, p); err != nil {
 		return nil, err
 	}
 	return []fball.CountryResponse{cr}, nil
@@ -80,7 +100,11 @@ type response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-func (c *Client) get(data response, endpoint string, params map[string]string) error {
+type toMapper interface {
+	ToMap() map[string]string
+}
+
+func (c *Client) get(data response, endpoint string, mapper toMapper) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
@@ -89,6 +113,7 @@ func (c *Client) get(data response, endpoint string, params map[string]string) e
 	}
 
 	url := base + endpoint
+	params := mapper.ToMap()
 	if len(params) > 0 {
 		url += "?"
 		pList := make([]string, 0, len(params))

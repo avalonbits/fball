@@ -65,7 +65,7 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(tr))
 
-	cr, err := c.Country(ctx)
+	cr, err := c.Country(ctx, client.CountryParams{})
 	if err != nil {
 		logger.Fatal(err)
 	}
