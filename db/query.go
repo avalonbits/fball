@@ -68,43 +68,22 @@ SELECT Response from RequestCache
 	LIMIT ?
 `
 
+type noParams struct{}
+
+func (np noParams) URLQueryString() string {
+	return ""
+}
+
 func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
-	if q == nil || q.DB == nil {
-		return nil, nil
-	}
-
-	if max < 1 {
-		max = 1
-	}
-
 	tzResp := []fball.TimezoneResponse{}
-	err := transact(ctx, q.DB, func(tx *sql.Tx) error {
-		stmt, err := tx.PrepareContext(ctx, querySQL)
-		if err != nil {
+	err := q.query(ctx, fball.EP_Timezone, noParams{}, max, r, func(data []byte) error {
+		tr := fball.TimezoneResponse{}
+		if err := json.Unmarshal(data, &tr); err != nil {
 			return err
 		}
-		defer stmt.Close()
-
-		top, bottom := r.UnixNano()
-		rows, err := stmt.QueryContext(ctx, fball.EP_Timezone, "", top, bottom, max)
-		if err != nil {
-			return err
-		}
-
-		for rows.Next() {
-			bytes := []byte{}
-			tr := fball.TimezoneResponse{}
-			if err := rows.Scan(&bytes); err != nil {
-				return err
-			}
-			if err := json.Unmarshal(bytes, &tr); err != nil {
-				return err
-			}
-			tzResp = append(tzResp, tr)
-		}
+		tzResp = append(tzResp, tr)
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -113,16 +92,34 @@ func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.Timez
 
 func (q *Querier) Country(
 	ctx context.Context, params client.CountryParams, max int, r Range) ([]fball.CountryResponse, error) {
+	resp := []fball.CountryResponse{}
+	err := q.query(ctx, fball.EP_Countries, params, max, r, func(data []byte) error {
+		cr := fball.CountryResponse{}
+		if err := json.Unmarshal(data, &cr); err != nil {
+			return err
+		}
+		resp = append(resp, cr)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+type queryCB func([]byte) error
+
+func (q *Querier) query(
+	ctx context.Context, endpoint string, params urlQueryStringer, max int, r Range, cb queryCB) error {
 	if q == nil || q.DB == nil {
-		return nil, nil
+		return nil
 	}
 
 	if max < 1 {
 		max = 1
 	}
 
-	cResp := []fball.CountryResponse{}
-	err := transact(ctx, q.DB, func(tx *sql.Tx) error {
+	return transact(ctx, q.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, querySQL)
 		if err != nil {
 			return err
@@ -130,27 +127,20 @@ func (q *Querier) Country(
 		defer stmt.Close()
 
 		top, bottom := r.UnixNano()
-		rows, err := stmt.QueryContext(ctx, fball.EP_Countries, params.URLQueryString(), top, bottom, max)
+		rows, err := stmt.QueryContext(ctx, endpoint, params.URLQueryString(), top, bottom, max)
 		if err != nil {
 			return err
 		}
 
 		for rows.Next() {
 			bytes := []byte{}
-			cr := fball.CountryResponse{}
 			if err := rows.Scan(&bytes); err != nil {
 				return err
 			}
-			if err := json.Unmarshal(bytes, &cr); err != nil {
+			if err := cb(bytes); err != nil {
 				return err
 			}
-			cResp = append(cResp, cr)
 		}
 		return nil
 	})
-
-	if err != nil {
-		return nil, err
-	}
-	return cResp, nil
 }
