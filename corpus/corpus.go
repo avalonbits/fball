@@ -21,6 +21,7 @@ package corpus
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -43,6 +44,7 @@ const (
 type Corpus struct {
 	logger *log.Logger
 	fballc *client.Client
+	handle *db.Handle
 	query  *db.Querier
 	insert *db.Inserter
 }
@@ -53,26 +55,36 @@ func New(fballc *client.Client, logger *log.Logger, dbs *sql.DB) Corpus {
 		fballc: fballc,
 		query:  &db.Querier{DB: dbs},
 		insert: &db.Inserter{DB: dbs},
+		handle: &db.Handle{DB: dbs},
 	}
 }
 
 func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
 	// Query the timezone from the database.
-	tr, err := c.query.Timezone(ctx, 1, db.Range{})
-	if err == nil && len(tr) != 0 {
-		if len(tr) != 0 && rp_Infinite.Valid(time.Now(), tr[0].When()) {
-			return tr, nil
+	tzResp := []fball.TimezoneResponse{}
+	err := c.handle.Query(ctx, fball.EP_Timezone, db.NoParams{}, 1, db.Range{}, func(data []byte) error {
+		tr := fball.TimezoneResponse{}
+		if err := json.Unmarshal(data, &tr); err != nil {
+			return err
 		}
+		tzResp = append(tzResp, tr)
+		return nil
+	})
+
+	if err == nil && len(tzResp) != 0 && rp_Infinite.Valid(time.Now(), tzResp[0].When()) {
+		return tzResp, nil
+	} else if err != nil {
+		c.logger.Printf("WARNING - query error for timezoe: %v", err)
 	}
 
 	// No timezone found, let's retrieve it from the api server.
 	trQ, err := c.fballc.Timezone(ctx)
 	if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
-		if len(tr) != 0 {
+		if len(tzResp) != 0 {
 			c.logger.Printf("WARNING - unable to query timezone: %v.", err)
 			c.logger.Printf("WARNING - returning stale data for countries.")
-			return tr, nil
+			return tzResp, nil
 		} else {
 			return nil, err
 		}

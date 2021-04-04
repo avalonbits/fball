@@ -36,7 +36,7 @@ INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
 func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) error {
-	return i.insert(ctx, fball.EP_Timezone, tr, noParams{})
+	return i.insert(ctx, fball.EP_Timezone, tr, NoParams{})
 }
 
 func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp client.CountryParams) error {

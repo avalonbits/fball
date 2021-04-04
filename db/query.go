@@ -68,21 +68,6 @@ SELECT Response from RequestCache
 	LIMIT ?
 `
 
-func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
-	tzResp := []fball.TimezoneResponse{}
-	if err := q.query(ctx, fball.EP_Timezone, noParams{}, max, r, func(data []byte) error {
-		tr := fball.TimezoneResponse{}
-		if err := json.Unmarshal(data, &tr); err != nil {
-			return err
-		}
-		tzResp = append(tzResp, tr)
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return tzResp, nil
-}
-
 func (q *Querier) Country(
 	ctx context.Context, params client.CountryParams, max int, r Range) ([]fball.CountryResponse, error) {
 	resp := []fball.CountryResponse{}
@@ -99,10 +84,10 @@ func (q *Querier) Country(
 	return resp, nil
 }
 
-type queryCB func([]byte) error
+type QueryCB func([]byte) error
 
 func (q *Querier) query(
-	ctx context.Context, endpoint string, params urlQueryStringer, max int, r Range, cb queryCB) error {
+	ctx context.Context, endpoint string, params urlQueryStringer, max int, r Range, cb QueryCB) error {
 	if q == nil || q.DB == nil {
 		return nil
 	}
