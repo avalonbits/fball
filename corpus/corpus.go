@@ -92,7 +92,7 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 
 	// Ok, so now we can store it back in the database. Note that if storing fails, we still want to
 	// return the data since the db is just a cache.
-	if err := c.insert.Timezone(ctx, trQ[0]); err != nil {
+	if err := c.handle.Insert(ctx, fball.EP_Timezone, trQ[0], db.NoParams{}); err != nil {
 		c.logger.Printf("ERROR - unable to write timezone to cache: %v", err)
 	}
 
