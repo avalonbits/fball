@@ -11,11 +11,11 @@ import (
 )
 
 func (c Corpus) getTimezoneResponse(
-	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
-	params URLQueryStringer) ([]TimezoneResponse, error) {
+	ctx context.Context, endpoint string, max int, rng tRange, policy refreshPolicy,
+	params urlQueryStringer) ([]TimezoneResponse, error) {
 	// Query the countries from the database.
 	resp := []TimezoneResponse{}
-	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
+	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := TimezoneResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
@@ -43,7 +43,7 @@ func (c Corpus) getTimezoneResponse(
 		}
 	}
 
-	if err := c.handle.Insert(ctx, endpoint, rQ, params); err != nil {
+	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
@@ -51,11 +51,11 @@ func (c Corpus) getTimezoneResponse(
 }
 
 func (c Corpus) getCountryResponse(
-	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
-	params URLQueryStringer) ([]CountryResponse, error) {
+	ctx context.Context, endpoint string, max int, rng tRange, policy refreshPolicy,
+	params urlQueryStringer) ([]CountryResponse, error) {
 	// Query the countries from the database.
 	resp := []CountryResponse{}
-	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
+	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := CountryResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
@@ -83,7 +83,7 @@ func (c Corpus) getCountryResponse(
 		}
 	}
 
-	if err := c.handle.Insert(ctx, endpoint, rQ, params); err != nil {
+	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 

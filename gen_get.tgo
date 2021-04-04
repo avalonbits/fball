@@ -11,11 +11,11 @@ import (
 type JSONResponse generic.Type
 
 func (c Corpus) getJSONResponse(
-	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
-	params URLQueryStringer) ([]JSONResponse, error) {
+	ctx context.Context, endpoint string, max int, rng tRange, policy refreshPolicy,
+	params urlQueryStringer) ([]JSONResponse, error) {
 	// Query the countries from the database.
 	resp := []JSONResponse{}
-	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
+	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := JSONResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
@@ -43,7 +43,7 @@ func (c Corpus) getJSONResponse(
 		}
 	}
 
-	if err := c.handle.Insert(ctx, endpoint, rQ, params); err != nil {
+	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 

@@ -23,10 +23,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
-type Handle struct {
+type Cache struct {
 	DB *sql.DB
 }
 
@@ -34,11 +33,7 @@ var insertSQL = `
 INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
-type response interface {
-	When() int64
-}
-
-func (h *Handle) Insert(ctx context.Context, endpoint string, data response, params URLQueryStringer) error {
+func (h *Cache) Insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
 	return transact(ctx, h.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
@@ -51,7 +46,7 @@ func (h *Handle) Insert(ctx context.Context, endpoint string, data response, par
 			return err
 		}
 
-		res, err := stmt.ExecContext(ctx, endpoint, params.URLQueryString(), data.When(), blob)
+		res, err := stmt.ExecContext(ctx, endpoint, params.urlQueryString(), data.When(), blob)
 		if err != nil {
 			return err
 		}
@@ -76,10 +71,10 @@ SELECT Response from RequestCache
 	LIMIT ?
 `
 
-type QueryCB func([]byte) error
+type queryCB func([]byte) error
 
-func (h *Handle) Query(
-	ctx context.Context, endpoint string, params URLQueryStringer, max int, r Range, cb QueryCB) error {
+func (h *Cache) Query(
+	ctx context.Context, endpoint string, params urlQueryStringer, max int, r tRange, cb queryCB) error {
 	if h == nil || h.DB == nil {
 		return nil
 	}
@@ -96,7 +91,7 @@ func (h *Handle) Query(
 		defer stmt.Close()
 
 		top, bottom := r.UnixNano()
-		rows, err := stmt.QueryContext(ctx, endpoint, params.URLQueryString(), top, bottom, max)
+		rows, err := stmt.QueryContext(ctx, endpoint, params.urlQueryString(), top, bottom, max)
 		if err != nil {
 			return err
 		}
@@ -112,37 +107,6 @@ func (h *Handle) Query(
 		}
 		return nil
 	})
-}
-
-type NoParams struct{}
-
-func (np NoParams) URLQueryString() string {
-	return ""
-}
-
-type Range struct {
-	Latest   time.Time
-	Earliest time.Time
-}
-
-func (r Range) UnixNano() (top, bottom int64) {
-	if r.Latest.IsZero() {
-		top = time.Now().UTC().UnixNano()
-	} else {
-		top = r.Latest.UTC().UnixNano()
-	}
-	if !r.Earliest.IsZero() {
-		bottom = r.Earliest.UTC().UnixNano()
-	}
-	return
-}
-
-func (r Range) IsZero() bool {
-	return r.Latest.IsZero() && r.Earliest.IsZero()
-}
-
-type URLQueryStringer interface {
-	URLQueryString() string
 }
 
 func transact(ctx context.Context, db *sql.DB, fn func(*sql.Tx) error) (dberr error) {

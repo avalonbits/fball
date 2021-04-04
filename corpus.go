@@ -21,37 +21,30 @@ package fball
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
-	"time"
-)
-
-type refreshPolicy time.Duration
-
-func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
-	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
-}
-
-const (
-	rp_OneDay   = refreshPolicy(86400 * time.Second)
-	rp_Infinite = refreshPolicy(1<<63 - 1)
+	"reflect"
+	"sort"
+	"strings"
+	"text/template"
 )
 
 type Corpus struct {
 	logger *log.Logger
 	fballc *Client
-	handle *Handle
+	cache  *Cache
 }
 
 func New(fballc *Client, logger *log.Logger, dbs *sql.DB) Corpus {
 	return Corpus{
 		logger: logger,
 		fballc: fballc,
-		handle: &Handle{DB: dbs},
+		cache:  &Cache{DB: dbs},
 	}
 }
 
 func (c Corpus) Timezone(ctx context.Context) ([]TimezoneResponse, error) {
-	return c.getTimezoneResponse(ctx, EP_Timezone, 1, Range{}, rp_Infinite, NoParams{})
+	return c.getTimezoneResponse(ctx, ep_Timezone, 1, tRange{}, rp_Infinite, noParams{})
 }
 
 type CountryParams struct {
@@ -60,10 +53,36 @@ type CountryParams struct {
 	Search string
 }
 
-func (cp CountryParams) URLQueryString() string {
-	return StructToURLQueryString(cp)
+func (cp CountryParams) urlQueryString() string {
+	return structToURLQueryString(cp)
 }
 
 func (c Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
-	return c.getCountryResponse(ctx, EP_Countries, 1, Range{}, rp_OneDay, cp)
+	return c.getCountryResponse(ctx, ep_Countries, 1, tRange{}, rp_OneDay, cp)
+}
+
+func structToURLQueryString(data interface{}) string {
+	v := reflect.ValueOf(data)
+	t := reflect.TypeOf(data)
+	if v.Kind() != reflect.Struct {
+		panic(fmt.Errorf("expected a struct, got %v", v.Kind()))
+	}
+
+	strs := []string{}
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		if f.Kind() != reflect.String {
+			continue
+		}
+		val := f.Interface().(string)
+		if val == "" {
+			continue
+		}
+
+		key := strings.ToLower(t.Field(i).Name)
+		strs = append(strs, template.URLQueryEscaper(key)+"="+template.URLQueryEscaper(val))
+	}
+	sort.Strings(strs)
+
+	return strings.Join(strs, "&")
 }

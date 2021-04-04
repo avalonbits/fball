@@ -18,36 +18,51 @@
 
 package fball
 
-import (
-	"fmt"
-	"reflect"
-	"sort"
-	"strings"
-	"text/template"
+import "time"
+
+type urlQueryStringer interface {
+	urlQueryString() string
+}
+
+type noParams struct{}
+
+func (np noParams) urlQueryString() string {
+	return ""
+}
+
+type tRange struct {
+	Latest   time.Time
+	Earliest time.Time
+}
+
+func (r tRange) UnixNano() (top, bottom int64) {
+	if r.Latest.IsZero() {
+		top = time.Now().UTC().UnixNano()
+	} else {
+		top = r.Latest.UTC().UnixNano()
+	}
+	if !r.Earliest.IsZero() {
+		bottom = r.Earliest.UTC().UnixNano()
+	}
+	return
+}
+
+func (r tRange) IsZero() bool {
+	return r.Latest.IsZero() && r.Earliest.IsZero()
+}
+
+type refreshPolicy time.Duration
+
+func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
+	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
+}
+
+const (
+	rp_OneDay   = refreshPolicy(86400 * time.Second)
+	rp_Infinite = refreshPolicy(1<<63 - 1)
 )
 
-func StructToURLQueryString(data interface{}) string {
-	v := reflect.ValueOf(data)
-	t := reflect.TypeOf(data)
-	if v.Kind() != reflect.Struct {
-		panic(fmt.Errorf("expected a struct, got %v", v.Kind()))
-	}
-
-	strs := []string{}
-	for i := 0; i < v.NumField(); i++ {
-		f := v.Field(i)
-		if f.Kind() != reflect.String {
-			continue
-		}
-		val := f.Interface().(string)
-		if val == "" {
-			continue
-		}
-
-		key := strings.ToLower(t.Field(i).Name)
-		strs = append(strs, template.URLQueryEscaper(key)+"="+template.URLQueryEscaper(val))
-	}
-	sort.Strings(strs)
-
-	return strings.Join(strs, "&")
-}
+const (
+	ep_Timezone  = "/timezone"
+	ep_Countries = "/countries"
+)
