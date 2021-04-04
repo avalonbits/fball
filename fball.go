@@ -18,7 +18,30 @@
 
 package fball
 
-import "time"
+import (
+	"fmt"
+	"reflect"
+	"sort"
+	"strings"
+	"text/template"
+	"time"
+)
+
+type refreshPolicy time.Duration
+
+func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
+	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
+}
+
+const (
+	rp_OneDay   = refreshPolicy(86400 * time.Second)
+	rp_Infinite = refreshPolicy(1<<63 - 1)
+)
+
+const (
+	ep_Timezone  = "/timezone"
+	ep_Countries = "/countries"
+)
 
 type urlQueryStringer interface {
 	urlQueryString() string
@@ -51,18 +74,28 @@ func (r tRange) IsZero() bool {
 	return r.Latest.IsZero() && r.Earliest.IsZero()
 }
 
-type refreshPolicy time.Duration
+func structToURLQueryString(data interface{}) string {
+	v := reflect.ValueOf(data)
+	t := reflect.TypeOf(data)
+	if v.Kind() != reflect.Struct {
+		panic(fmt.Errorf("expected a struct, got %v", v.Kind()))
+	}
 
-func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
-	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
+	strs := []string{}
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		if f.Kind() != reflect.String {
+			continue
+		}
+		val := f.Interface().(string)
+		if val == "" {
+			continue
+		}
+
+		key := strings.ToLower(t.Field(i).Name)
+		strs = append(strs, template.URLQueryEscaper(key)+"="+template.URLQueryEscaper(val))
+	}
+	sort.Strings(strs)
+
+	return strings.Join(strs, "&")
 }
-
-const (
-	rp_OneDay   = refreshPolicy(86400 * time.Second)
-	rp_Infinite = refreshPolicy(1<<63 - 1)
-)
-
-const (
-	ep_Timezone  = "/timezone"
-	ep_Countries = "/countries"
-)

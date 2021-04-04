@@ -54,7 +54,7 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 	}
 }
 
-type response interface {
+type Response interface {
 	Err() error
 	SetWhen(int64)
 	When() int64
@@ -62,7 +62,7 @@ type response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-func (c *Client) Get(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
+func (c *Client) Get(ctx context.Context, endpoint string, data Response, params urlQueryStringer) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}

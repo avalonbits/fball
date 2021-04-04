@@ -25,7 +25,7 @@ import (
 	"fmt"
 )
 
-type Cache struct {
+type cache struct {
 	DB *sql.DB
 }
 
@@ -33,8 +33,8 @@ var insertSQL = `
 INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
-func (h *Cache) Insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
-	return transact(ctx, h.DB, func(tx *sql.Tx) error {
+func (c *cache) Insert(ctx context.Context, endpoint string, data Response, params urlQueryStringer) error {
+	return transact(ctx, c.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
 			return err
@@ -73,9 +73,9 @@ SELECT Response from RequestCache
 
 type queryCB func([]byte) error
 
-func (h *Cache) Query(
+func (c *cache) Query(
 	ctx context.Context, endpoint string, params urlQueryStringer, max int, r tRange, cb queryCB) error {
-	if h == nil || h.DB == nil {
+	if c == nil || c.DB == nil {
 		return nil
 	}
 
@@ -83,7 +83,7 @@ func (h *Cache) Query(
 		max = 1
 	}
 
-	return transact(ctx, h.DB, func(tx *sql.Tx) error {
+	return transact(ctx, c.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, querySQL)
 		if err != nil {
 			return err

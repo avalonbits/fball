@@ -51,7 +51,7 @@ func main() {
 	}
 	defer DB.Close()
 
-	c := fball.New(
+	c := fball.NewCorpus(
 		fball.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
 		logger,
 		DB,
