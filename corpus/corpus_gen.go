@@ -35,7 +35,7 @@ func (c Corpus) getFballCountryResponse(
 
 	// Either the data is not available or it has expired.
 	crQ := fball.CountryResponse{}
-	if err := c.fballc.Get(ctx, fball.EP_Countries, &crQ, params); err != nil {
+	if err := c.fballc.Get(ctx, endpoint, &crQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -75,7 +75,7 @@ func (c Corpus) getFballTimezoneResponse(
 
 	// Either the data is not available or it has expired.
 	crQ := fball.TimezoneResponse{}
-	if err := c.fballc.Get(ctx, fball.EP_Countries, &crQ, params); err != nil {
+	if err := c.fballc.Get(ctx, endpoint, &crQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
