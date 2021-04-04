@@ -68,23 +68,16 @@ SELECT Response from RequestCache
 	LIMIT ?
 `
 
-type noParams struct{}
-
-func (np noParams) URLQueryString() string {
-	return ""
-}
-
 func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.TimezoneResponse, error) {
 	tzResp := []fball.TimezoneResponse{}
-	err := q.query(ctx, fball.EP_Timezone, noParams{}, max, r, func(data []byte) error {
+	if err := q.query(ctx, fball.EP_Timezone, noParams{}, max, r, func(data []byte) error {
 		tr := fball.TimezoneResponse{}
 		if err := json.Unmarshal(data, &tr); err != nil {
 			return err
 		}
 		tzResp = append(tzResp, tr)
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 	return tzResp, nil
@@ -93,15 +86,14 @@ func (q *Querier) Timezone(ctx context.Context, max int, r Range) ([]fball.Timez
 func (q *Querier) Country(
 	ctx context.Context, params client.CountryParams, max int, r Range) ([]fball.CountryResponse, error) {
 	resp := []fball.CountryResponse{}
-	err := q.query(ctx, fball.EP_Countries, params, max, r, func(data []byte) error {
+	if err := q.query(ctx, fball.EP_Countries, params, max, r, func(data []byte) error {
 		cr := fball.CountryResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
 		}
 		resp = append(resp, cr)
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 	return resp, nil

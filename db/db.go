@@ -23,6 +23,16 @@ import (
 	"database/sql"
 )
 
+type noParams struct{}
+
+func (np noParams) URLQueryString() string {
+	return ""
+}
+
+type urlQueryStringer interface {
+	URLQueryString() string
+}
+
 func transact(ctx context.Context, db *sql.DB, fn func(*sql.Tx) error) (dberr error) {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

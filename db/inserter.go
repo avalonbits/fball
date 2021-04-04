@@ -35,14 +35,8 @@ var insertSQL = `
 INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
-type noParam struct{}
-
-func (np noParam) URLQueryString() string {
-	return ""
-}
-
 func (i *Inserter) Timezone(ctx context.Context, tr fball.TimezoneResponse) error {
-	return i.insert(ctx, fball.EP_Timezone, tr, noParam{})
+	return i.insert(ctx, fball.EP_Timezone, tr, noParams{})
 }
 
 func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp client.CountryParams) error {
@@ -51,10 +45,6 @@ func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp cli
 
 type response interface {
 	When() int64
-}
-
-type urlQueryStringer interface {
-	URLQueryString() string
 }
 
 func (i *Inserter) insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
