@@ -22,7 +22,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"time"
 
 	"git.cana.pw/avalonbits/fball"
 	"git.cana.pw/avalonbits/fball/client"
@@ -31,42 +30,6 @@ import (
 type Querier struct {
 	DB *sql.DB
 }
-
-type Range struct {
-	Latest   time.Time
-	Earliest time.Time
-}
-
-func (r Range) UnixNano() (top, bottom int64) {
-	if r.Latest.IsZero() {
-		top = time.Now().UTC().UnixNano()
-	} else {
-		top = r.Latest.UTC().UnixNano()
-	}
-	if !r.Earliest.IsZero() {
-		bottom = r.Earliest.UTC().UnixNano()
-	}
-	return
-}
-
-func (r Range) IsZero() bool {
-	return r.Latest.IsZero() && r.Earliest.IsZero()
-}
-
-var querySQL = `
-SELECT Response from RequestCache
-	WHERE
-		Endpoint = ?
-		AND
-			Params = ?
-		AND
-			Timestamp <= ?
-		AND
-			Timestamp >= ?
-	ORDER BY
-		Timestamp DESC
-	LIMIT ?
-`
 
 func (q *Querier) Country(
 	ctx context.Context, params client.CountryParams, max int, r Range) ([]fball.CountryResponse, error) {

@@ -45,16 +45,12 @@ type Corpus struct {
 	logger *log.Logger
 	fballc *client.Client
 	handle *db.Handle
-	query  *db.Querier
-	insert *db.Inserter
 }
 
 func New(fballc *client.Client, logger *log.Logger, dbs *sql.DB) Corpus {
 	return Corpus{
 		logger: logger,
 		fballc: fballc,
-		query:  &db.Querier{DB: dbs},
-		insert: &db.Inserter{DB: dbs},
 		handle: &db.Handle{DB: dbs},
 	}
 }
@@ -130,7 +126,7 @@ func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.C
 		}
 	}
 
-	if err := c.insert.Country(ctx, crQ[0], cp); err != nil {
+	if err := c.handle.Insert(ctx, fball.EP_Countries, crQ[0], cp); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 

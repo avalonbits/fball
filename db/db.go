@@ -23,10 +23,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type Handle struct {
 	DB *sql.DB
+}
+
+var insertSQL = `
+INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
+				  VALUES(?, ?, ?, ?);`
+
+type response interface {
+	When() int64
 }
 
 func (h *Handle) Insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
@@ -51,6 +60,21 @@ func (h *Handle) Insert(ctx context.Context, endpoint string, data response, par
 
 	})
 }
+
+var querySQL = `
+SELECT Response from RequestCache
+	WHERE
+		Endpoint = ?
+		AND
+			Params = ?
+		AND
+			Timestamp <= ?
+		AND
+			Timestamp >= ?
+	ORDER BY
+		Timestamp DESC
+	LIMIT ?
+`
 
 func (h *Handle) Query(
 	ctx context.Context, endpoint string, params urlQueryStringer, max int, r Range, cb QueryCB) error {
@@ -92,6 +116,27 @@ type NoParams struct{}
 
 func (np NoParams) URLQueryString() string {
 	return ""
+}
+
+type Range struct {
+	Latest   time.Time
+	Earliest time.Time
+}
+
+func (r Range) UnixNano() (top, bottom int64) {
+	if r.Latest.IsZero() {
+		top = time.Now().UTC().UnixNano()
+	} else {
+		top = r.Latest.UTC().UnixNano()
+	}
+	if !r.Earliest.IsZero() {
+		bottom = r.Earliest.UTC().UnixNano()
+	}
+	return
+}
+
+func (r Range) IsZero() bool {
+	return r.Latest.IsZero() && r.Earliest.IsZero()
 }
 
 type urlQueryStringer interface {

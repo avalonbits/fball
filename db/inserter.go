@@ -31,16 +31,8 @@ type Inserter struct {
 	DB *sql.DB
 }
 
-var insertSQL = `
-INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
-				  VALUES(?, ?, ?, ?);`
-
 func (i *Inserter) Country(ctx context.Context, cr fball.CountryResponse, cp client.CountryParams) error {
 	return i.insert(ctx, fball.EP_Countries, cr, cp)
-}
-
-type response interface {
-	When() int64
 }
 
 func (i *Inserter) insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
