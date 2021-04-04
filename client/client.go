@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"time"
 
-	"git.cana.pw/avalonbits/fball"
 	"git.cana.pw/avalonbits/fball/db"
 )
 
@@ -55,32 +54,6 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 		logger: logger,
 		limit:  limit,
 	}
-}
-
-func (c *Client) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
-	tr := fball.TimezoneResponse{}
-	if err := c.Get(ctx, fball.EP_Timezone, &tr, db.NoParams{}); err != nil {
-		return nil, err
-	}
-	return []fball.TimezoneResponse{tr}, nil
-}
-
-type CountryParams struct {
-	Name   string
-	Code   string
-	Search string
-}
-
-func (cp CountryParams) URLQueryString() string {
-	return fball.StructToURLQueryString(cp)
-}
-
-func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryResponse, error) {
-	cr := fball.CountryResponse{}
-	if err := c.Get(ctx, fball.EP_Countries, &cr, p); err != nil {
-		return nil, err
-	}
-	return []fball.CountryResponse{cr}, nil
 }
 
 type response interface {

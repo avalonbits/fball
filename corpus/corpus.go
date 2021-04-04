@@ -74,8 +74,8 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 	}
 
 	// No timezone found, let's retrieve it from the api server.
-	trQ, err := c.fballc.Timezone(ctx)
-	if err != nil {
+	trQ := fball.TimezoneResponse{}
+	if err := c.fballc.Get(ctx, fball.EP_Timezone, &trQ, db.NoParams{}); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(tzResp) != 0 {
 			c.logger.Printf("WARNING - unable to query timezone: %v.", err)
@@ -88,14 +88,24 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 
 	// Ok, so now we can store it back in the database. Note that if storing fails, we still want to
 	// return the data since the db is just a cache.
-	if err := c.handle.Insert(ctx, fball.EP_Timezone, trQ[0], db.NoParams{}); err != nil {
+	if err := c.handle.Insert(ctx, fball.EP_Timezone, trQ, db.NoParams{}); err != nil {
 		c.logger.Printf("ERROR - unable to write timezone to cache: %v", err)
 	}
 
-	return trQ, nil
+	return []fball.TimezoneResponse{trQ}, nil
 }
 
-func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.CountryResponse, error) {
+type CountryParams struct {
+	Name   string
+	Code   string
+	Search string
+}
+
+func (cp CountryParams) URLQueryString() string {
+	return fball.StructToURLQueryString(cp)
+}
+
+func (c Corpus) Country(ctx context.Context, cp CountryParams) ([]fball.CountryResponse, error) {
 	// Query the countries from the database.
 	crResp := []fball.CountryResponse{}
 	err := c.handle.Query(ctx, fball.EP_Countries, cp, 1, db.Range{}, func(data []byte) error {
@@ -114,8 +124,8 @@ func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.C
 	}
 
 	// Either the data is not available or it has expired.
-	crQ, err := c.fballc.Country(ctx, cp)
-	if err != nil {
+	crQ := fball.CountryResponse{}
+	if err := c.fballc.Get(ctx, fball.EP_Countries, &crQ, cp); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(crResp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -126,9 +136,9 @@ func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.C
 		}
 	}
 
-	if err := c.handle.Insert(ctx, fball.EP_Countries, crQ[0], cp); err != nil {
+	if err := c.handle.Insert(ctx, fball.EP_Countries, crQ, cp); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
-	return crQ, nil
+	return []fball.CountryResponse{crQ}, nil
 }
