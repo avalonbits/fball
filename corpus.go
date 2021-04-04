@@ -22,6 +22,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 )
 
 type Corpus struct {
@@ -39,7 +40,7 @@ func NewCorpus(fballc *Client, logger *log.Logger, dbs *sql.DB) *Corpus {
 }
 
 func (c *Corpus) Timezone(ctx context.Context) ([]TimezoneResponse, error) {
-	return c.getTimezoneResponse(ctx, ep_Timezone, 1, tRange{}, rp_Infinite, noParams{})
+	return c.getTimezoneResponse(ctx, EP_Timezone, 1, tRange{}, rp_Infinite, noParams{})
 }
 
 type CountryParams struct {
@@ -53,5 +54,16 @@ func (cp CountryParams) urlQueryString() string {
 }
 
 func (c *Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
-	return c.getCountryResponse(ctx, ep_Countries, 1, tRange{}, rp_OneDay, cp)
+	return c.getCountryResponse(ctx, EP_Countries, 1, tRange{}, rp_OneDay, cp)
 }
+
+type refreshPolicy time.Duration
+
+func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
+	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
+}
+
+const (
+	rp_OneDay   = refreshPolicy(86400 * time.Second)
+	rp_Infinite = refreshPolicy(1<<63 - 1)
+)

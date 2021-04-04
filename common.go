@@ -27,20 +27,9 @@ import (
 	"time"
 )
 
-type refreshPolicy time.Duration
-
-func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
-	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
-}
-
 const (
-	rp_OneDay   = refreshPolicy(86400 * time.Second)
-	rp_Infinite = refreshPolicy(1<<63 - 1)
-)
-
-const (
-	ep_Timezone  = "/timezone"
-	ep_Countries = "/countries"
+	EP_Timezone  = "/timezone"
+	EP_Countries = "/countries"
 )
 
 type urlQueryStringer interface {
