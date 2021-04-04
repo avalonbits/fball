@@ -1,20 +1,18 @@
-package corpus
+package fball
 
 import (
 	"context"
 	"encoding/json"
 	"time"
 
-	"git.cana.pw/avalonbits/fball"
-	"git.cana.pw/avalonbits/fball/db"
 	"github.com/cheekybits/genny/generic"
 )
 
 type JSONResponse generic.Type
 
 func (c Corpus) getJSONResponse(
-	ctx context.Context, endpoint string, max int, rng db.Range, policy refreshPolicy,
-	params db.URLQueryStringer) ([]JSONResponse, error) {
+	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
+	params URLQueryStringer) ([]JSONResponse, error) {
 	// Query the countries from the database.
 	resp := []JSONResponse{}
 	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {

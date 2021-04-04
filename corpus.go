@@ -16,17 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package corpus
+package fball
 
 import (
 	"context"
 	"database/sql"
 	"log"
 	"time"
-
-	"git.cana.pw/avalonbits/fball"
-	"git.cana.pw/avalonbits/fball/client"
-	"git.cana.pw/avalonbits/fball/db"
 )
 
 type refreshPolicy time.Duration
@@ -42,20 +38,20 @@ const (
 
 type Corpus struct {
 	logger *log.Logger
-	fballc *client.Client
-	handle *db.Handle
+	fballc *Client
+	handle *Handle
 }
 
-func New(fballc *client.Client, logger *log.Logger, dbs *sql.DB) Corpus {
+func New(fballc *Client, logger *log.Logger, dbs *sql.DB) Corpus {
 	return Corpus{
 		logger: logger,
 		fballc: fballc,
-		handle: &db.Handle{DB: dbs},
+		handle: &Handle{DB: dbs},
 	}
 }
 
-func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
-	return c.getFballTimezoneResponse(ctx, fball.EP_Timezone, 1, db.Range{}, rp_Infinite, db.NoParams{})
+func (c Corpus) Timezone(ctx context.Context) ([]TimezoneResponse, error) {
+	return c.getTimezoneResponse(ctx, EP_Timezone, 1, Range{}, rp_Infinite, NoParams{})
 }
 
 type CountryParams struct {
@@ -65,9 +61,9 @@ type CountryParams struct {
 }
 
 func (cp CountryParams) URLQueryString() string {
-	return fball.StructToURLQueryString(cp)
+	return StructToURLQueryString(cp)
 }
 
-func (c Corpus) Country(ctx context.Context, cp CountryParams) ([]fball.CountryResponse, error) {
-	return c.getFballCountryResponse(ctx, fball.EP_Countries, 1, db.Range{}, rp_OneDay, cp)
+func (c Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
+	return c.getCountryResponse(ctx, EP_Countries, 1, Range{}, rp_OneDay, cp)
 }

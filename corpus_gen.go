@@ -2,41 +2,21 @@
 // Any changes will be lost if this file is regenerated.
 // see https://github.com/cheekybits/genny
 
-/*
- * Copyright (C) 2021  Igor Cananea <icc@avalonbits.com>
- * Author: Igor Cananea <icc@avalonbits.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package corpus
+package fball
 
 import (
 	"context"
 	"encoding/json"
 	"time"
-
-	"git.cana.pw/avalonbits/fball"
-	"git.cana.pw/avalonbits/fball/db"
 )
 
-func (c Corpus) getFballTimezoneResponse(
-	ctx context.Context, endpoint string, max int, rng db.Range, policy refreshPolicy,
-	params db.URLQueryStringer) ([]fball.TimezoneResponse, error) {
+func (c Corpus) getTimezoneResponse(
+	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
+	params URLQueryStringer) ([]TimezoneResponse, error) {
 	// Query the countries from the database.
-	resp := []fball.TimezoneResponse{}
+	resp := []TimezoneResponse{}
 	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
-		cr := fball.TimezoneResponse{}
+		cr := TimezoneResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
 		}
@@ -51,7 +31,7 @@ func (c Corpus) getFballTimezoneResponse(
 	}
 
 	// Either the data is not available or it has expired.
-	rQ := fball.TimezoneResponse{}
+	rQ := TimezoneResponse{}
 	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
@@ -67,34 +47,16 @@ func (c Corpus) getFballTimezoneResponse(
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
-	return []fball.TimezoneResponse{rQ}, nil
+	return []TimezoneResponse{rQ}, nil
 }
 
-/*
- * Copyright (C) 2021  Igor Cananea <icc@avalonbits.com>
- * Author: Igor Cananea <icc@avalonbits.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-func (c Corpus) getFballCountryResponse(
-	ctx context.Context, endpoint string, max int, rng db.Range, policy refreshPolicy,
-	params db.URLQueryStringer) ([]fball.CountryResponse, error) {
+func (c Corpus) getCountryResponse(
+	ctx context.Context, endpoint string, max int, rng Range, policy refreshPolicy,
+	params URLQueryStringer) ([]CountryResponse, error) {
 	// Query the countries from the database.
-	resp := []fball.CountryResponse{}
+	resp := []CountryResponse{}
 	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
-		cr := fball.CountryResponse{}
+		cr := CountryResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
 		}
@@ -109,7 +71,7 @@ func (c Corpus) getFballCountryResponse(
 	}
 
 	// Either the data is not available or it has expired.
-	rQ := fball.CountryResponse{}
+	rQ := CountryResponse{}
 	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
@@ -125,5 +87,5 @@ func (c Corpus) getFballCountryResponse(
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
-	return []fball.CountryResponse{rQ}, nil
+	return []CountryResponse{rQ}, nil
 }

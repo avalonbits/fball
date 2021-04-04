@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package client
+package fball
 
 import (
 	"context"
@@ -25,8 +25,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"git.cana.pw/avalonbits/fball/db"
 )
 
 type Doer interface {
@@ -63,7 +61,7 @@ type Response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-func (c *Client) Get(ctx context.Context, endpoint string, data Response, params db.URLQueryStringer) error {
+func (c *Client) Get(ctx context.Context, endpoint string, data Response, params URLQueryStringer) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}

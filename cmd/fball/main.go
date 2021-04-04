@@ -28,8 +28,7 @@ import (
 	"os"
 	"time"
 
-	"git.cana.pw/avalonbits/fball/client"
-	"git.cana.pw/avalonbits/fball/corpus"
+	"git.cana.pw/avalonbits/fball"
 	"github.com/kr/pretty"
 	"go.uber.org/ratelimit"
 
@@ -52,8 +51,8 @@ func main() {
 	}
 	defer DB.Close()
 
-	c := corpus.New(
-		client.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
+	c := fball.New(
+		fball.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
 		logger,
 		DB,
 	)
@@ -65,7 +64,7 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(tr))
 
-	cr, err := c.Country(ctx, corpus.CountryParams{})
+	cr, err := c.Country(ctx, fball.CountryParams{})
 	if err != nil {
 		logger.Fatal(err)
 	}
