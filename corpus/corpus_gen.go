@@ -19,7 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package corpus
 
 import (
@@ -31,13 +30,13 @@ import (
 	"git.cana.pw/avalonbits/fball/db"
 )
 
-func (c Corpus) getFballCountryResponse(
+func (c Corpus) getFballTimezoneResponse(
 	ctx context.Context, endpoint string, max int, rng db.Range, policy refreshPolicy,
-	params db.URLQueryStringer) ([]fball.CountryResponse, error) {
+	params db.URLQueryStringer) ([]fball.TimezoneResponse, error) {
 	// Query the countries from the database.
-	resp := []fball.CountryResponse{}
+	resp := []fball.TimezoneResponse{}
 	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
-		cr := fball.CountryResponse{}
+		cr := fball.TimezoneResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
 		}
@@ -45,15 +44,15 @@ func (c Corpus) getFballCountryResponse(
 		return nil
 	})
 
-	if err == nil && len(resp) != 0 && rp_OneDay.Valid(time.Now(), resp[0].When()) {
+	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
 	} else if err != nil {
 		c.logger.Printf("WARNING - query error for countries: %v", err)
 	}
 
 	// Either the data is not available or it has expired.
-	crQ := fball.CountryResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &crQ, params); err != nil {
+	rQ := fball.TimezoneResponse{}
+	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -64,11 +63,11 @@ func (c Corpus) getFballCountryResponse(
 		}
 	}
 
-	if err := c.handle.Insert(ctx, endpoint, crQ, params); err != nil {
+	if err := c.handle.Insert(ctx, endpoint, rQ, params); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
-	return []fball.CountryResponse{crQ}, nil
+	return []fball.TimezoneResponse{rQ}, nil
 }
 
 /*
@@ -89,13 +88,13 @@ func (c Corpus) getFballCountryResponse(
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-func (c Corpus) getFballTimezoneResponse(
+func (c Corpus) getFballCountryResponse(
 	ctx context.Context, endpoint string, max int, rng db.Range, policy refreshPolicy,
-	params db.URLQueryStringer) ([]fball.TimezoneResponse, error) {
+	params db.URLQueryStringer) ([]fball.CountryResponse, error) {
 	// Query the countries from the database.
-	resp := []fball.TimezoneResponse{}
+	resp := []fball.CountryResponse{}
 	err := c.handle.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
-		cr := fball.TimezoneResponse{}
+		cr := fball.CountryResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
 			return err
 		}
@@ -103,15 +102,15 @@ func (c Corpus) getFballTimezoneResponse(
 		return nil
 	})
 
-	if err == nil && len(resp) != 0 && rp_OneDay.Valid(time.Now(), resp[0].When()) {
+	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
 	} else if err != nil {
 		c.logger.Printf("WARNING - query error for countries: %v", err)
 	}
 
 	// Either the data is not available or it has expired.
-	crQ := fball.TimezoneResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &crQ, params); err != nil {
+	rQ := fball.CountryResponse{}
+	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -122,9 +121,9 @@ func (c Corpus) getFballTimezoneResponse(
 		}
 	}
 
-	if err := c.handle.Insert(ctx, endpoint, crQ, params); err != nil {
+	if err := c.handle.Insert(ctx, endpoint, rQ, params); err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
-	return []fball.TimezoneResponse{crQ}, nil
+	return []fball.CountryResponse{rQ}, nil
 }
