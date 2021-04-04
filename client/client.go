@@ -22,10 +22,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"git.cana.pw/avalonbits/fball"
@@ -74,17 +72,7 @@ type CountryParams struct {
 }
 
 func (cp CountryParams) URLQueryString() string {
-	strs := []string{}
-	if cp.Name != "" {
-		strs = append(strs, "name="+template.URLQueryEscaper(cp.Name))
-	}
-	if cp.Code != "" {
-		strs = append(strs, "code="+template.URLQueryEscaper(cp.Code))
-	}
-	if cp.Search != "" {
-		strs = append(strs, "search="+template.URLQueryEscaper(cp.Search))
-	}
-	return strings.Join(strs, "&")
+	return fball.StructToURLQueryString(cp)
 }
 
 func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryResponse, error) {
