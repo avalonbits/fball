@@ -38,7 +38,7 @@ type response interface {
 	When() int64
 }
 
-func (h *Handle) Insert(ctx context.Context, endpoint string, data response, params urlQueryStringer) error {
+func (h *Handle) Insert(ctx context.Context, endpoint string, data response, params URLQueryStringer) error {
 	return transact(ctx, h.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
@@ -76,8 +76,10 @@ SELECT Response from RequestCache
 	LIMIT ?
 `
 
+type QueryCB func([]byte) error
+
 func (h *Handle) Query(
-	ctx context.Context, endpoint string, params urlQueryStringer, max int, r Range, cb QueryCB) error {
+	ctx context.Context, endpoint string, params URLQueryStringer, max int, r Range, cb QueryCB) error {
 	if h == nil || h.DB == nil {
 		return nil
 	}
@@ -139,7 +141,7 @@ func (r Range) IsZero() bool {
 	return r.Latest.IsZero() && r.Earliest.IsZero()
 }
 
-type urlQueryStringer interface {
+type URLQueryStringer interface {
 	URLQueryString() string
 }
 

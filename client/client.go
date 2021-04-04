@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"git.cana.pw/avalonbits/fball"
+	"git.cana.pw/avalonbits/fball/db"
 )
 
 type Doer interface {
@@ -60,7 +61,7 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 
 func (c *Client) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
 	tr := fball.TimezoneResponse{}
-	if err := c.get(ctx, &tr, fball.EP_Timezone, noParam{}); err != nil {
+	if err := c.Get(ctx, fball.EP_Timezone, &tr, db.NoParams{}); err != nil {
 		return nil, err
 	}
 	return []fball.TimezoneResponse{tr}, nil
@@ -88,7 +89,7 @@ func (cp CountryParams) URLQueryString() string {
 
 func (c *Client) Country(ctx context.Context, p CountryParams) ([]fball.CountryResponse, error) {
 	cr := fball.CountryResponse{}
-	if err := c.get(ctx, &cr, fball.EP_Countries, p); err != nil {
+	if err := c.Get(ctx, fball.EP_Countries, &cr, p); err != nil {
 		return nil, err
 	}
 	return []fball.CountryResponse{cr}, nil
@@ -101,17 +102,7 @@ type response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-type urlQueryStringer interface {
-	URLQueryString() string
-}
-
-type noParam struct{}
-
-func (np noParam) URLQueryString() string {
-	return ""
-}
-
-func (c *Client) get(ctx context.Context, data response, endpoint string, params urlQueryStringer) error {
+func (c *Client) Get(ctx context.Context, endpoint string, data response, params db.URLQueryStringer) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
