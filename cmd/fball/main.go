@@ -64,11 +64,10 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(tr))
-	/*
-		cr, err := c.Country(ctx, client.CountryParams{})
-		if err != nil {
-			logger.Fatal(err)
-		}
-		logger.Println(pretty.Sprint(cr)
-	*/
+
+	cr, err := c.Country(ctx, client.CountryParams{})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(cr))
 }

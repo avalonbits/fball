@@ -74,7 +74,7 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 	if err == nil && len(tzResp) != 0 && rp_Infinite.Valid(time.Now(), tzResp[0].When()) {
 		return tzResp, nil
 	} else if err != nil {
-		c.logger.Printf("WARNING - query error for timezoe: %v", err)
+		c.logger.Printf("WARNING - query error for timezone: %v", err)
 	}
 
 	// No timezone found, let's retrieve it from the api server.
@@ -101,22 +101,30 @@ func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) 
 
 func (c Corpus) Country(ctx context.Context, cp client.CountryParams) ([]fball.CountryResponse, error) {
 	// Query the countries from the database.
-	cr, err := c.query.Country(ctx, cp, 1, db.Range{})
-	if err == nil && len(cr) != 0 {
-		// Country data is valid for one day.
-		if len(cr) != 0 && rp_OneDay.Valid(time.Now(), cr[0].When()) {
-			return cr, nil
+	crResp := []fball.CountryResponse{}
+	err := c.handle.Query(ctx, fball.EP_Countries, cp, 1, db.Range{}, func(data []byte) error {
+		cr := fball.CountryResponse{}
+		if err := json.Unmarshal(data, &cr); err != nil {
+			return err
 		}
+		crResp = append(crResp, cr)
+		return nil
+	})
+
+	if err == nil && len(crResp) != 0 && rp_OneDay.Valid(time.Now(), crResp[0].When()) {
+		return crResp, nil
+	} else if err != nil {
+		c.logger.Printf("WARNING - query error for countries: %v", err)
 	}
 
 	// Either the data is not available or it has expired.
 	crQ, err := c.fballc.Country(ctx, cp)
 	if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
-		if len(cr) != 0 {
+		if len(crResp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
 			c.logger.Printf("WARNING - returning stale data for countries.")
-			return cr, nil
+			return crResp, nil
 		} else {
 			return nil, err
 		}
