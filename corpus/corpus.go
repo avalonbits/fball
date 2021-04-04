@@ -21,7 +21,6 @@ package corpus
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"log"
 	"time"
 
@@ -56,43 +55,7 @@ func New(fballc *client.Client, logger *log.Logger, dbs *sql.DB) Corpus {
 }
 
 func (c Corpus) Timezone(ctx context.Context) ([]fball.TimezoneResponse, error) {
-	// Query the timezone from the database.
-	tzResp := []fball.TimezoneResponse{}
-	err := c.handle.Query(ctx, fball.EP_Timezone, db.NoParams{}, 1, db.Range{}, func(data []byte) error {
-		tr := fball.TimezoneResponse{}
-		if err := json.Unmarshal(data, &tr); err != nil {
-			return err
-		}
-		tzResp = append(tzResp, tr)
-		return nil
-	})
-
-	if err == nil && len(tzResp) != 0 && rp_Infinite.Valid(time.Now(), tzResp[0].When()) {
-		return tzResp, nil
-	} else if err != nil {
-		c.logger.Printf("WARNING - query error for timezone: %v", err)
-	}
-
-	// No timezone found, let's retrieve it from the api server.
-	trQ := fball.TimezoneResponse{}
-	if err := c.fballc.Get(ctx, fball.EP_Timezone, &trQ, db.NoParams{}); err != nil {
-		// We tolerate stale data if the api call fails. We still log it.
-		if len(tzResp) != 0 {
-			c.logger.Printf("WARNING - unable to query timezone: %v.", err)
-			c.logger.Printf("WARNING - returning stale data for countries.")
-			return tzResp, nil
-		} else {
-			return nil, err
-		}
-	}
-
-	// Ok, so now we can store it back in the database. Note that if storing fails, we still want to
-	// return the data since the db is just a cache.
-	if err := c.handle.Insert(ctx, fball.EP_Timezone, trQ, db.NoParams{}); err != nil {
-		c.logger.Printf("ERROR - unable to write timezone to cache: %v", err)
-	}
-
-	return []fball.TimezoneResponse{trQ}, nil
+	return c.getFballTimezoneResponse(ctx, fball.EP_Timezone, 1, db.Range{}, rp_Infinite, db.NoParams{})
 }
 
 type CountryParams struct {
@@ -106,39 +69,5 @@ func (cp CountryParams) URLQueryString() string {
 }
 
 func (c Corpus) Country(ctx context.Context, cp CountryParams) ([]fball.CountryResponse, error) {
-	// Query the countries from the database.
-	crResp := []fball.CountryResponse{}
-	err := c.handle.Query(ctx, fball.EP_Countries, cp, 1, db.Range{}, func(data []byte) error {
-		cr := fball.CountryResponse{}
-		if err := json.Unmarshal(data, &cr); err != nil {
-			return err
-		}
-		crResp = append(crResp, cr)
-		return nil
-	})
-
-	if err == nil && len(crResp) != 0 && rp_OneDay.Valid(time.Now(), crResp[0].When()) {
-		return crResp, nil
-	} else if err != nil {
-		c.logger.Printf("WARNING - query error for countries: %v", err)
-	}
-
-	// Either the data is not available or it has expired.
-	crQ := fball.CountryResponse{}
-	if err := c.fballc.Get(ctx, fball.EP_Countries, &crQ, cp); err != nil {
-		// We tolerate stale data if the api call fails. We still log it.
-		if len(crResp) != 0 {
-			c.logger.Printf("WARNING - unable to query countries: %v.", err)
-			c.logger.Printf("WARNING - returning stale data for countries.")
-			return crResp, nil
-		} else {
-			return nil, err
-		}
-	}
-
-	if err := c.handle.Insert(ctx, fball.EP_Countries, crQ, cp); err != nil {
-		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
-	}
-
-	return []fball.CountryResponse{crQ}, nil
+	return c.getFballCountryResponse(ctx, fball.EP_Countries, 1, db.Range{}, rp_OneDay, cp)
 }
