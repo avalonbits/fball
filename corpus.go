@@ -61,6 +61,17 @@ func (c *Corpus) Season(ctx context.Context) ([]SeasonResponse, error) {
 	return c.getSeasonResponse(ctx, EP_Season, 1, tRange{}, rp_OneDay, NoParams{})
 }
 
+type LeagueInfoParams struct {
+}
+
+func (lp LeagueInfoParams) urlQueryString() string {
+	return structToURLQueryString(lp)
+}
+
+func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) ([]LeagueInfoResponse, error) {
+	return c.getLeagueInfoResponse(ctx, EP_LeagueInfo, 1, tRange{}, rp_OneHour, params)
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
@@ -68,6 +79,7 @@ func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
 }
 
 const (
+	rp_OneHour  = refreshPolicy(time.Hour)
 	rp_OneDay   = refreshPolicy(86400 * time.Second)
 	rp_Infinite = refreshPolicy(1<<63 - 1)
 )

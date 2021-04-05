@@ -15,6 +15,8 @@ func (c Corpus) getTimezoneResponse(
 	params urlQueryStringer) ([]TimezoneResponse, error) {
 	// Query the countries from the database.
 	resp := []TimezoneResponse{}
+
+	q1 := time.Now()
 	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := TimezoneResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
@@ -23,6 +25,8 @@ func (c Corpus) getTimezoneResponse(
 		resp = append(resp, cr)
 		return nil
 	})
+	q2 := time.Now()
+	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
 
 	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
@@ -32,7 +36,13 @@ func (c Corpus) getTimezoneResponse(
 
 	// Either the data is not available or it has expired.
 	rQ := TimezoneResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
+
+	s1 := time.Now()
+	err = c.fballc.Get(ctx, endpoint, &rQ, params)
+	s2 := time.Now()
+	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+	if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -43,7 +53,12 @@ func (c Corpus) getTimezoneResponse(
 		}
 	}
 
-	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
+	i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, &rQ, params)
+	i2 := time.Now()
+	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+	if err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
@@ -55,6 +70,8 @@ func (c Corpus) getCountryResponse(
 	params urlQueryStringer) ([]CountryResponse, error) {
 	// Query the countries from the database.
 	resp := []CountryResponse{}
+
+	q1 := time.Now()
 	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := CountryResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
@@ -63,6 +80,8 @@ func (c Corpus) getCountryResponse(
 		resp = append(resp, cr)
 		return nil
 	})
+	q2 := time.Now()
+	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
 
 	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
@@ -72,7 +91,13 @@ func (c Corpus) getCountryResponse(
 
 	// Either the data is not available or it has expired.
 	rQ := CountryResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
+
+	s1 := time.Now()
+	err = c.fballc.Get(ctx, endpoint, &rQ, params)
+	s2 := time.Now()
+	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+	if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -83,7 +108,12 @@ func (c Corpus) getCountryResponse(
 		}
 	}
 
-	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
+	i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, &rQ, params)
+	i2 := time.Now()
+	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+	if err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
@@ -95,6 +125,8 @@ func (c Corpus) getSeasonResponse(
 	params urlQueryStringer) ([]SeasonResponse, error) {
 	// Query the countries from the database.
 	resp := []SeasonResponse{}
+
+	q1 := time.Now()
 	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := SeasonResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
@@ -103,6 +135,8 @@ func (c Corpus) getSeasonResponse(
 		resp = append(resp, cr)
 		return nil
 	})
+	q2 := time.Now()
+	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
 
 	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
@@ -112,7 +146,13 @@ func (c Corpus) getSeasonResponse(
 
 	// Either the data is not available or it has expired.
 	rQ := SeasonResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
+
+	s1 := time.Now()
+	err = c.fballc.Get(ctx, endpoint, &rQ, params)
+	s2 := time.Now()
+	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+	if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -123,9 +163,69 @@ func (c Corpus) getSeasonResponse(
 		}
 	}
 
-	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
+	i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, &rQ, params)
+	i2 := time.Now()
+	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+	if err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 
 	return []SeasonResponse{rQ}, nil
+}
+
+func (c Corpus) getLeagueInfoResponse(
+	ctx context.Context, endpoint string, max int, rng tRange, policy refreshPolicy,
+	params urlQueryStringer) ([]LeagueInfoResponse, error) {
+	// Query the countries from the database.
+	resp := []LeagueInfoResponse{}
+
+	q1 := time.Now()
+	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
+		cr := LeagueInfoResponse{}
+		if err := json.Unmarshal(data, &cr); err != nil {
+			return err
+		}
+		resp = append(resp, cr)
+		return nil
+	})
+	q2 := time.Now()
+	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
+
+	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
+		return resp, nil
+	} else if err != nil {
+		c.logger.Printf("WARNING - query error for countries: %v", err)
+	}
+
+	// Either the data is not available or it has expired.
+	rQ := LeagueInfoResponse{}
+
+	s1 := time.Now()
+	err = c.fballc.Get(ctx, endpoint, &rQ, params)
+	s2 := time.Now()
+	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+	if err != nil {
+		// We tolerate stale data if the api call fails. We still log it.
+		if len(resp) != 0 {
+			c.logger.Printf("WARNING - unable to query countries: %v.", err)
+			c.logger.Printf("WARNING - returning stale data for countries.")
+			return resp, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, &rQ, params)
+	i2 := time.Now()
+	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+	if err != nil {
+		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
+	}
+
+	return []LeagueInfoResponse{rQ}, nil
 }

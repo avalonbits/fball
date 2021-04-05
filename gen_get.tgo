@@ -15,6 +15,8 @@ func (c Corpus) getJSONResponse(
 	params urlQueryStringer) ([]JSONResponse, error) {
 	// Query the countries from the database.
 	resp := []JSONResponse{}
+
+    q1 := time.Now()
 	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
 		cr := JSONResponse{}
 		if err := json.Unmarshal(data, &cr); err != nil {
@@ -23,6 +25,8 @@ func (c Corpus) getJSONResponse(
 		resp = append(resp, cr)
 		return nil
 	})
+    q2 := time.Now()
+    c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
 
 	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
 		return resp, nil
@@ -32,7 +36,13 @@ func (c Corpus) getJSONResponse(
 
 	// Either the data is not available or it has expired.
 	rQ := JSONResponse{}
-	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
+
+    s1 := time.Now()
+    err = c.fballc.Get(ctx, endpoint, &rQ, params)
+    s2 := time.Now()
+    c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+    if err != nil {
 		// We tolerate stale data if the api call fails. We still log it.
 		if len(resp) != 0 {
 			c.logger.Printf("WARNING - unable to query countries: %v.", err)
@@ -43,7 +53,12 @@ func (c Corpus) getJSONResponse(
 		}
 	}
 
-	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
+    i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, &rQ, params)
+    i2 := time.Now()
+    c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+    if err != nil {
 		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
 	}
 

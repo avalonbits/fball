@@ -49,6 +49,43 @@ type SeasonResponse struct {
 	Season []int `json:"response"`
 }
 
+type LeagueInfoResponse struct {
+	CommonResponse
+
+	LeagueInfo []LeagueInfo `json:"response"`
+}
+
+type LeagueInfo struct {
+	League struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+		Type string `json:"type"`
+		Logo string `json:"logo"`
+	} `json:"league"`
+	Country Country `json:"country"`
+	Seasons []struct {
+		Year     int    `json:"year"`
+		Start    string `json:"start"`
+		End      string `json:"end"`
+		Current  bool   `json:"current"`
+		Coverage struct {
+			Fixtures struct {
+				Events             bool `json:"events"`
+				Lineups            bool `json:"lineups"`
+				StatisticsFixtures bool `json:"statistics_fixtures"`
+				StatisticsPlayers  bool `json:"statistics_players"`
+			} `json:"fixtures"`
+			Standings   bool `json:"standings"`
+			Players     bool `json:"players"`
+			TopScorers  bool `json:"top_scorers"`
+			TopAssists  bool `json:"top_assists"`
+			TopCards    bool `json:"top_cards"`
+			Predictions bool `json:"predictions"`
+			Odds        bool `json:"odds"`
+		} `json:"coverage"`
+	} `json:"seasons"`
+}
+
 type CommonResponse struct {
 	Get        string      `json:"get"`
 	Parameters interface{} `json:"parameters"`

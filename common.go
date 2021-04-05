@@ -28,9 +28,10 @@ import (
 )
 
 const (
-	EP_Timezone  = "/timezone"
-	EP_Countries = "/countries"
-	EP_Season    = "/leagues/seasons"
+	EP_Timezone   = "/timezone"
+	EP_Countries  = "/countries"
+	EP_Season     = "/leagues/seasons"
+	EP_LeagueInfo = "/leagues"
 )
 
 type urlQueryStringer interface {

@@ -76,4 +76,10 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(sr))
 
+	lir, err := c.LeagueInfo(ctx, fball.LeagueInfoParams{})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(lir))
+
 }
