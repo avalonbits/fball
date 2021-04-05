@@ -82,4 +82,12 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(lir))
 
+	tir, err := c.TeamInfo(ctx, fball.TeamInfoParams{
+		Country: "Brazil",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(tir))
+
 }

@@ -32,6 +32,7 @@ const (
 	EP_Countries  = "/countries"
 	EP_Season     = "/leagues/seasons"
 	EP_LeagueInfo = "/leagues"
+	EP_TeamInfo   = "/teams"
 )
 
 type urlQueryStringer interface {

@@ -27,13 +27,11 @@ import (
 
 type TimezoneResponse struct {
 	CommonResponse
-
 	Timezone []string `json:"response"`
 }
 
 type CountryResponse struct {
 	CommonResponse
-
 	Country []Country `json:"response"`
 }
 
@@ -45,13 +43,11 @@ type Country struct {
 
 type SeasonResponse struct {
 	CommonResponse
-
 	Season []int `json:"response"`
 }
 
 type LeagueInfoResponse struct {
 	CommonResponse
-
 	LeagueInfo []LeagueInfo `json:"response"`
 }
 
@@ -84,6 +80,35 @@ type LeagueInfo struct {
 			Odds        bool `json:"odds"`
 		} `json:"coverage"`
 	} `json:"seasons"`
+}
+
+type TeamInfoResponse struct {
+	CommonResponse
+	TeamInfo []TeamInfo `json:"response"`
+}
+
+type TeamInfo struct {
+	Team  TeamData `json:"team"`
+	Venue Venue    `json:"venue"`
+}
+
+type TeamData struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Country  string `json:"country"`
+	Founded  int    `json:"founded"`
+	National bool   `json:"national"`
+	Logo     string `json:"logo"`
+}
+
+type Venue struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	City     string `json:"city"`
+	Capacity int    `json:"capacity"`
+	Surface  string `json:"surface"`
+	Image    string `json:"image"`
 }
 
 type CommonResponse struct {

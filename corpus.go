@@ -74,12 +74,29 @@ type LeagueInfoParams struct {
 	Last    string
 }
 
-func (lp LeagueInfoParams) urlQueryString() string {
-	return structToURLQueryString(lp)
+func (lip LeagueInfoParams) urlQueryString() string {
+	return structToURLQueryString(lip)
 }
 
 func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) ([]LeagueInfoResponse, error) {
 	return c.getLeagueInfoResponse(ctx, EP_LeagueInfo, 1, tRange{}, rp_OneHour, params)
+}
+
+type TeamInfoParams struct {
+	ID      string
+	Name    string
+	League  string
+	Season  string
+	Country string
+	Search  string
+}
+
+func (tip TeamInfoParams) urlQueryString() string {
+	return structToURLQueryString(tip)
+}
+
+func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) ([]TeamInfoResponse, error) {
+	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneHour, params)
 }
 
 type refreshPolicy time.Duration
