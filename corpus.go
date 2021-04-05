@@ -96,7 +96,7 @@ func (tip TeamInfoParams) urlQueryString() string {
 }
 
 func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) ([]TeamInfoResponse, error) {
-	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneHour, params)
+	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneDay, params)
 }
 
 type refreshPolicy time.Duration
