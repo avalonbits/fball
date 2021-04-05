@@ -69,4 +69,11 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(cr))
+
+	sr, err := c.Season(ctx)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(sr))
+
 }

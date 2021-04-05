@@ -43,6 +43,12 @@ type Country struct {
 	Flag string `json:"flag"`
 }
 
+type SeasonResponse struct {
+	CommonResponse
+
+	Season []int `json:"response"`
+}
+
 type CommonResponse struct {
 	Get        string      `json:"get"`
 	Parameters interface{} `json:"parameters"`

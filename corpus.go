@@ -40,7 +40,7 @@ func NewCorpus(fballc *Client, logger *log.Logger, dbs *sql.DB) *Corpus {
 }
 
 func (c *Corpus) Timezone(ctx context.Context) ([]TimezoneResponse, error) {
-	return c.getTimezoneResponse(ctx, EP_Timezone, 1, tRange{}, rp_Infinite, noParams{})
+	return c.getTimezoneResponse(ctx, EP_Timezone, 1, tRange{}, rp_Infinite, NoParams{})
 }
 
 type CountryParams struct {
@@ -55,6 +55,10 @@ func (cp CountryParams) urlQueryString() string {
 
 func (c *Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
 	return c.getCountryResponse(ctx, EP_Countries, 1, tRange{}, rp_OneDay, cp)
+}
+
+func (c *Corpus) Season(ctx context.Context) ([]SeasonResponse, error) {
+	return c.getSeasonResponse(ctx, EP_Season, 1, tRange{}, rp_OneDay, NoParams{})
 }
 
 type refreshPolicy time.Duration

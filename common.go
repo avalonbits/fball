@@ -30,15 +30,16 @@ import (
 const (
 	EP_Timezone  = "/timezone"
 	EP_Countries = "/countries"
+	EP_Season    = "/leagues/seasons"
 )
 
 type urlQueryStringer interface {
 	urlQueryString() string
 }
 
-type noParams struct{}
+type NoParams struct{}
 
-func (np noParams) urlQueryString() string {
+func (np NoParams) urlQueryString() string {
 	return ""
 }
 

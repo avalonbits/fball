@@ -89,3 +89,43 @@ func (c Corpus) getCountryResponse(
 
 	return []CountryResponse{rQ}, nil
 }
+
+func (c Corpus) getSeasonResponse(
+	ctx context.Context, endpoint string, max int, rng tRange, policy refreshPolicy,
+	params urlQueryStringer) ([]SeasonResponse, error) {
+	// Query the countries from the database.
+	resp := []SeasonResponse{}
+	err := c.cache.Query(ctx, endpoint, params, max, rng, func(data []byte) error {
+		cr := SeasonResponse{}
+		if err := json.Unmarshal(data, &cr); err != nil {
+			return err
+		}
+		resp = append(resp, cr)
+		return nil
+	})
+
+	if err == nil && len(resp) != 0 && policy.Valid(time.Now(), resp[0].When()) {
+		return resp, nil
+	} else if err != nil {
+		c.logger.Printf("WARNING - query error for countries: %v", err)
+	}
+
+	// Either the data is not available or it has expired.
+	rQ := SeasonResponse{}
+	if err := c.fballc.Get(ctx, endpoint, &rQ, params); err != nil {
+		// We tolerate stale data if the api call fails. We still log it.
+		if len(resp) != 0 {
+			c.logger.Printf("WARNING - unable to query countries: %v.", err)
+			c.logger.Printf("WARNING - returning stale data for countries.")
+			return resp, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	if err := c.cache.Insert(ctx, endpoint, &rQ, params); err != nil {
+		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
+	}
+
+	return []SeasonResponse{rQ}, nil
+}
