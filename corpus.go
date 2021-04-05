@@ -62,6 +62,16 @@ func (c *Corpus) Season(ctx context.Context) ([]SeasonResponse, error) {
 }
 
 type LeagueInfoParams struct {
+	ID      string
+	Name    string
+	Country string
+	Code    string
+	Season  string
+	Team    string
+	Type    string
+	Current string
+	Search  string
+	Last    string
 }
 
 func (lp LeagueInfoParams) urlQueryString() string {
