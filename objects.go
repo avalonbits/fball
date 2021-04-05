@@ -111,6 +111,97 @@ type Venue struct {
 	Image    string `json:"image"`
 }
 
+type TeamStatsResponse struct {
+	CommonResponse
+
+	TeamStats struct {
+		League struct {
+			ID      int    `json:"id"`
+			Name    string `json:"name"`
+			Country string `json:"country"`
+			Logo    string `json:"logo"`
+			Flag    string `json:"flag"`
+			Season  int    `json:"season"`
+		} `json:"league"`
+		Team     TeamData `json:"team"`
+		Form     string   `json:"form"`
+		Fixtures struct {
+			Played Totals `json:"played"`
+			Wins   Totals `json:"wins"`
+			Draws  Totals `json:"draws"`
+			Loses  Totals `json:"loses"`
+		} `json:"fixtures"`
+		Goals struct {
+			For struct {
+				Total   Totals   `json:"total"`
+				Average TotalStr `json:"average"`
+				Minute  GameTime `json:"minute"`
+			} `json:"for"`
+			Against struct {
+				Total   Totals   `json:"total"`
+				Average TotalStr `json:"average"`
+				Minute  GameTime `json:"minute"`
+			} `json:"against"`
+		} `json:"goals"`
+		Biggest struct {
+			Streak struct {
+				Wins  int `json:"wins"`
+				Draws int `json:"draws"`
+				Loses int `json:"loses"`
+			} `json:"streak"`
+			Wins  TotalStr `json:"wins"`
+			Losev TotalStr `json:"loses"`
+			Goals struct {
+				For     Totals `json:"for"`
+				Against Totals `json:"against"`
+			} `json:"goals"`
+		} `json:"biggest"`
+		CleanSheet    Totals `json:"clean_sheet"`
+		FailedToScore Totals `json:"failed_to_score"`
+		Penalty       struct {
+			Scored TotalPercent `json:"scored"`
+			Missed TotalPercent `json:"missed"`
+			Total  int          `json:"total"`
+		} `json:"penalty"`
+		Lineups []struct {
+			Formation string `json:"formation"`
+			Played    int    `json:"played"`
+		} `json:"lineups"`
+		Cards struct {
+			Yellow GameTime `json:"yellow"`
+			Red    GameTime `json:"red"`
+		} `json:"cards"`
+	} `json:"response"`
+}
+
+type Totals struct {
+	Home  int `json:"home"`
+	Away  int `json:"away"`
+	Total int `json:"total"`
+}
+
+type TotalStr struct {
+	Home  string `json:"home"`
+	Away  string `json:"away"`
+	Total string `json:"total"`
+}
+
+type GameTime struct {
+	P15  TotalPercent `json:"0-15"`
+	P30  TotalPercent `json:"16-30"`
+	P45  TotalPercent `json:"31-45"`
+	P60  TotalPercent `json:"46-60"`
+	P75  TotalPercent `json:"61-75"`
+	P90  TotalPercent `json:"76-90"`
+	P105 TotalPercent `json:"91-105"`
+	P120 TotalPercent `json:"105-120"`
+}
+
+type TotalPercent struct {
+	Total      int    `json:"total"`
+	Percentage string `json:"percentage"`
+}
+
 type CommonResponse struct {
 	Get        string      `json:"get"`
 	Parameters interface{} `json:"parameters"`

@@ -90,4 +90,13 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(tir))
 
+	tsr, err := c.TeamStats(ctx, fball.TeamStatsParams{
+		League: "71",
+		Season: "2020",
+		Team:   "123",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(tsr))
 }

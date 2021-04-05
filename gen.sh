@@ -3,5 +3,6 @@ TimezoneResponse,\
 CountryResponse,\
 SeasonResponse,\
 LeagueInfoResponse,\
-TeamInfoResponse\
+TeamInfoResponse,\
+TeamStatsResponse\
 "

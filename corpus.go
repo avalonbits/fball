@@ -99,6 +99,21 @@ func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) ([]TeamInf
 	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneDay, params)
 }
 
+type TeamStatsParams struct {
+	League string
+	Season string
+	Team   string
+	Date   string
+}
+
+func (tsp TeamStatsParams) urlQueryString() string {
+	return structToURLQueryString(tsp)
+}
+
+func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) ([]TeamStatsResponse, error) {
+	return c.getTeamStatsResponse(ctx, EP_TeamStats, 1, tRange{}, rp_OneDay, params)
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
