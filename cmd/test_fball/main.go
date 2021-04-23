@@ -99,4 +99,12 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(tsr))
+
+	vr, err := c.Venue(ctx, fball.VenueParams{
+		Country: "Brazil",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(vr))
 }

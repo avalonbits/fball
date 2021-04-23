@@ -92,6 +92,11 @@ type TeamInfoResponse struct {
 	TeamInfo []TeamInfo `json:"response"`
 }
 
+type VenueResponse struct {
+	CommonResponse
+	Venue []Venue `json:"response"`
+}
+
 type TeamInfo struct {
 	Team  TeamData `json:"team"`
 	Venue Venue    `json:"venue"`
@@ -113,6 +118,7 @@ type Venue struct {
 	City     string `json:"city"`
 	Capacity int    `json:"capacity"`
 	Surface  string `json:"surface"`
+	Country  string `json:"country"`
 	Image    string `json:"image"`
 }
 

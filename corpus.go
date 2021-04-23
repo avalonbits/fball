@@ -114,6 +114,22 @@ func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) ([]TeamS
 	return c.getTeamStatsResponse(ctx, EP_TeamStats, 1, tRange{}, rp_OneDay, params)
 }
 
+type VenueParams struct {
+	ID      string
+	Name    string
+	City    string
+	Country string
+	Search  string
+}
+
+func (vp VenueParams) urlQueryString() string {
+	return structToURLQueryString(vp)
+}
+
+func (c *Corpus) Venue(ctx context.Context, params VenueParams) ([]VenueResponse, error) {
+	return c.getVenueResponse(ctx, EP_Venue, 1, tRange{}, rp_OneDay, params)
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {

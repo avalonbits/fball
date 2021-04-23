@@ -4,5 +4,6 @@ CountryResponse,\
 SeasonResponse,\
 LeagueInfoResponse,\
 TeamInfoResponse,\
-TeamStatsResponse\
+TeamStatsResponse,\
+VenueResponse\
 "
