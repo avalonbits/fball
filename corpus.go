@@ -130,6 +130,20 @@ func (c *Corpus) Venue(ctx context.Context, params VenueParams) ([]VenueResponse
 	return c.getVenueResponse(ctx, EP_Venue, 1, tRange{}, rp_OneDay, params)
 }
 
+type StandingsParams struct {
+	League string
+	Season string
+	Team   string
+}
+
+func (sp StandingsParams) urlQueryString() string {
+	return structToURLQueryString(sp)
+}
+
+func (c *Corpus) Standings(ctx context.Context, params StandingsParams) ([]StandingsResponse, error) {
+	return c.getStandingsResponse(ctx, EP_Standings, 1, tRange{}, rp_OneHour, params)
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {

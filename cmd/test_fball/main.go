@@ -107,4 +107,14 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(vr))
+
+	sp, err := c.Standings(ctx, fball.StandingsParams{
+		League: "71",
+		Season: "2020",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(sp))
+
 }

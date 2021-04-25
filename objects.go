@@ -77,14 +77,30 @@ type LeagueInfo struct {
 	} `json:"seasons"`
 }
 
+type Ranking struct {
+	Rank        int        `json:"rank"`
+	Team        TeamData   `json:"team"`
+	Points      int        `json:"points"`
+	Goalsdiff   int        `json:"goalsDiff"`
+	Group       string     `json:"group"`
+	Form        string     `json:"form"`
+	Status      string     `json:"status"`
+	Description string     `json:"description"`
+	All         RankTotals `json:"all"`
+	Home        RankTotals `json:"home"`
+	Away        RankTotals `json:"away"`
+	Update      string     `json:"update"`
+}
+
 type League struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Country string `json:"country"`
-	Logo    string `json:"logo"`
-	Flag    string `json:"flag"`
-	Season  int    `json:"season"`
+	ID       int         `json:"id"`
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Country  string      `json:"country"`
+	Logo     string      `json:"logo"`
+	Flag     string      `json:"flag"`
+	Season   int         `json:"season"`
+	Rankings [][]Ranking `json:"standings"`
 }
 
 type TeamInfoResponse struct {
@@ -120,6 +136,24 @@ type Venue struct {
 	Surface  string `json:"surface"`
 	Country  string `json:"country"`
 	Image    string `json:"image"`
+}
+
+type StandingsResponse struct {
+	CommonResponse
+	Standings []struct {
+		League League `json:"league"`
+	} `json:"response"`
+}
+
+type RankTotals struct {
+	Played int `json:"played"`
+	Win    int `json:"win"`
+	Draw   int `json:"draw"`
+	Lose   int `json:"lose"`
+	Goals  struct {
+		For     int `json:"for"`
+		Against int `json:"against"`
+	} `json:"goals"`
 }
 
 type TeamStatsResponse struct {
