@@ -19,10 +19,13 @@
 package fball
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 type cache struct {
@@ -46,7 +49,16 @@ func (c *cache) Insert(ctx context.Context, endpoint string, data Response, para
 			return err
 		}
 
-		res, err := stmt.ExecContext(ctx, endpoint, params.urlQueryString(), data.When(), blob)
+		buf := &bytes.Buffer{}
+		zip := gzip.NewWriter(buf)
+		if _, err := zip.Write(blob); err != nil {
+			return err
+		}
+		if err := zip.Close(); err != nil {
+			return err
+		}
+
+		res, err := stmt.ExecContext(ctx, endpoint, params.urlQueryString(), data.When(), buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -97,11 +109,25 @@ func (c *cache) Query(
 		}
 
 		for rows.Next() {
-			bytes := []byte{}
-			if err := rows.Scan(&bytes); err != nil {
+			bs := []byte{}
+			if err := rows.Scan(&bs); err != nil {
 				return err
 			}
-			if err := cb(bytes); err != nil {
+
+			buf := bytes.NewBuffer(bs)
+			zip, err := gzip.NewReader(buf)
+			if err != nil {
+				return err
+			}
+			uBytes, err := io.ReadAll(zip)
+			if err != nil {
+				zip.Close()
+				return err
+			}
+			if err := zip.Close(); err != nil {
+				return err
+			}
+			if err := cb(uBytes); err != nil {
 				return err
 			}
 		}
