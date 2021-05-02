@@ -1,4 +1,4 @@
-module git.cana.pw/avalonbits/fball
+module github.com/avalonbits/fball
 
 go 1.16
 

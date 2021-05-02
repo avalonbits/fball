@@ -28,7 +28,7 @@ import (
 	"os"
 	"time"
 
-	"git.cana.pw/avalonbits/fball"
+	"github.com/avalonbits/fball"
 	"github.com/kr/pretty"
 	"go.uber.org/ratelimit"
 
