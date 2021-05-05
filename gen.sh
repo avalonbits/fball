@@ -6,5 +6,12 @@ LeagueInfoResponse,\
 TeamInfoResponse,\
 TeamStatsResponse,\
 VenueResponse,\
-StandingsResponse\
+StandingsResponse,\
+RoundResponse,\
+FixtureInfoResponse,\
+Head2HeadResponse,\
+StatisticsResponse,\
+EventResponse,\
+LineupResponse,\
+PlayerStatsResponse\
 "

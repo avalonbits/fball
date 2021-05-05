@@ -117,4 +117,22 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(sp))
 
+	rn, err := c.Round(ctx, fball.RoundParams{
+		League:  "71",
+		Season:  "2020",
+		Current: "false",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(rn))
+
+	fix, err := c.FixtureInfo(ctx, fball.FixtureInfoParams{
+		League: "71",
+		Season: "2020",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(fix))
 }

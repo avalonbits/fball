@@ -28,14 +28,16 @@ import (
 )
 
 const (
-	EP_Timezone   = "/timezone"
-	EP_Countries  = "/countries"
-	EP_Season     = "/leagues/seasons"
-	EP_LeagueInfo = "/leagues"
-	EP_TeamInfo   = "/teams"
-	EP_TeamStats  = "/teams/statistics"
-	EP_Venue      = "/venues"
-	EP_Standings  = "/standings"
+	EP_Timezone    = "/timezone"
+	EP_Countries   = "/countries"
+	EP_Season      = "/leagues/seasons"
+	EP_LeagueInfo  = "/leagues"
+	EP_TeamInfo    = "/teams"
+	EP_TeamStats   = "/teams/statistics"
+	EP_Venue       = "/venues"
+	EP_Standings   = "/standings"
+	EP_Round       = "/fixtures/rounds"
+	EP_FixtureInfo = "/fixtures"
 )
 
 type urlQueryStringer interface {
@@ -69,9 +71,13 @@ func (r tRange) IsZero() bool {
 	return r.Latest.IsZero() && r.Earliest.IsZero()
 }
 
-func structToURLQueryString(data interface{}) string {
-	v := reflect.ValueOf(data)
-	t := reflect.TypeOf(data)
+type toURLQueryString struct {
+	data interface{}
+}
+
+func (tuqs toURLQueryString) urlQueryString() string {
+	v := reflect.ValueOf(tuqs.data)
+	t := reflect.TypeOf(tuqs.data)
 	if v.Kind() != reflect.Struct {
 		panic(fmt.Errorf("expected a struct, got %v", v.Kind()))
 	}

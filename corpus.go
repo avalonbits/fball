@@ -49,12 +49,8 @@ type CountryParams struct {
 	Search string
 }
 
-func (cp CountryParams) urlQueryString() string {
-	return structToURLQueryString(cp)
-}
-
 func (c *Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
-	return c.getCountryResponse(ctx, EP_Countries, 1, tRange{}, rp_OneDay, cp)
+	return c.getCountryResponse(ctx, EP_Countries, 1, tRange{}, rp_OneDay, toURLQueryString{cp})
 }
 
 func (c *Corpus) Season(ctx context.Context) ([]SeasonResponse, error) {
@@ -74,12 +70,8 @@ type LeagueInfoParams struct {
 	Last    string
 }
 
-func (lip LeagueInfoParams) urlQueryString() string {
-	return structToURLQueryString(lip)
-}
-
 func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) ([]LeagueInfoResponse, error) {
-	return c.getLeagueInfoResponse(ctx, EP_LeagueInfo, 1, tRange{}, rp_OneHour, params)
+	return c.getLeagueInfoResponse(ctx, EP_LeagueInfo, 1, tRange{}, rp_OneHour, toURLQueryString{params})
 }
 
 type TeamInfoParams struct {
@@ -91,12 +83,8 @@ type TeamInfoParams struct {
 	Search  string
 }
 
-func (tip TeamInfoParams) urlQueryString() string {
-	return structToURLQueryString(tip)
-}
-
 func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) ([]TeamInfoResponse, error) {
-	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneDay, params)
+	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneDay, toURLQueryString{params})
 }
 
 type TeamStatsParams struct {
@@ -106,12 +94,8 @@ type TeamStatsParams struct {
 	Date   string
 }
 
-func (tsp TeamStatsParams) urlQueryString() string {
-	return structToURLQueryString(tsp)
-}
-
 func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) ([]TeamStatsResponse, error) {
-	return c.getTeamStatsResponse(ctx, EP_TeamStats, 1, tRange{}, rp_OneDay, params)
+	return c.getTeamStatsResponse(ctx, EP_TeamStats, 1, tRange{}, rp_OneDay, toURLQueryString{params})
 }
 
 type VenueParams struct {
@@ -122,12 +106,8 @@ type VenueParams struct {
 	Search  string
 }
 
-func (vp VenueParams) urlQueryString() string {
-	return structToURLQueryString(vp)
-}
-
 func (c *Corpus) Venue(ctx context.Context, params VenueParams) ([]VenueResponse, error) {
-	return c.getVenueResponse(ctx, EP_Venue, 1, tRange{}, rp_OneDay, params)
+	return c.getVenueResponse(ctx, EP_Venue, 1, tRange{}, rp_OneDay, toURLQueryString{params})
 }
 
 type StandingsParams struct {
@@ -136,12 +116,38 @@ type StandingsParams struct {
 	Team   string
 }
 
-func (sp StandingsParams) urlQueryString() string {
-	return structToURLQueryString(sp)
+func (c *Corpus) Standings(ctx context.Context, params StandingsParams) ([]StandingsResponse, error) {
+	return c.getStandingsResponse(ctx, EP_Standings, 1, tRange{}, rp_OneHour, toURLQueryString{params})
 }
 
-func (c *Corpus) Standings(ctx context.Context, params StandingsParams) ([]StandingsResponse, error) {
-	return c.getStandingsResponse(ctx, EP_Standings, 1, tRange{}, rp_OneHour, params)
+type RoundParams struct {
+	League  string
+	Season  string
+	Current string
+}
+
+func (c *Corpus) Round(ctx context.Context, params RoundParams) ([]RoundResponse, error) {
+	return c.getRoundResponse(ctx, EP_Round, 1, tRange{}, rp_OneDay, toURLQueryString{params})
+}
+
+type FixtureInfoParams struct {
+	ID       string
+	Live     string
+	Date     string
+	League   string
+	Season   string
+	Team     string
+	Last     string
+	Next     string
+	From     string
+	To       string
+	Round    string
+	Status   string
+	Timezone string
+}
+
+func (c *Corpus) FixtureInfo(ctx context.Context, params FixtureInfoParams) ([]FixtureInfoResponse, error) {
+	return c.getFixtureInfoResponse(ctx, EP_FixtureInfo, 1, tRange{}, rp_OneMinute, toURLQueryString{params})
 }
 
 type refreshPolicy time.Duration
@@ -151,7 +157,8 @@ func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
 }
 
 const (
-	rp_OneHour  = refreshPolicy(time.Hour)
-	rp_OneDay   = refreshPolicy(86400 * time.Second)
-	rp_Infinite = refreshPolicy(1<<63 - 1)
+	rp_OneMinute = refreshPolicy(time.Minute)
+	rp_OneHour   = refreshPolicy(time.Hour)
+	rp_OneDay    = refreshPolicy(86400 * time.Second)
+	rp_Infinite  = refreshPolicy(1<<63 - 1)
 )
