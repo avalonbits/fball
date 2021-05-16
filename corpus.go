@@ -21,6 +21,7 @@ package fball
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"log"
 	"time"
 )
@@ -39,8 +40,10 @@ func NewCorpus(fballc *Client, logger *log.Logger, dbs *sql.DB) *Corpus {
 	}
 }
 
-func (c *Corpus) Timezone(ctx context.Context) ([]TimezoneResponse, error) {
-	return c.getTimezoneResponse(ctx, EP_Timezone, 1, tRange{}, rp_Infinite, NoParams{})
+func (c *Corpus) Timezone(ctx context.Context) (TimezoneResponse, error) {
+	tr := TimezoneResponse{}
+	err := c.get(ctx, EP_Timezone, rp_Infinite, NoParams{}, &tr)
+	return tr, err
 }
 
 type CountryParams struct {
@@ -156,9 +159,59 @@ func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
 	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
 }
 
+func (rp refreshPolicy) Range(now time.Time) tRange {
+	now = now.UTC()
+	return tRange{
+		Latest:   now,
+		Earliest: now.Add(-time.Duration(rp)),
+	}
+}
+
 const (
 	rp_OneMinute = refreshPolicy(time.Minute)
 	rp_OneHour   = refreshPolicy(time.Hour)
 	rp_OneDay    = refreshPolicy(86400 * time.Second)
 	rp_Infinite  = refreshPolicy(1<<63 - 1)
 )
+
+func (c *Corpus) get(
+	ctx context.Context, endpoint string, policy refreshPolicy, params urlQueryStringer, data Response) error {
+	q1 := time.Now()
+	found := false
+	err := c.cache.Query(ctx, endpoint, params, 1, policy.Range(q1), func(bs []byte) error {
+		if err := json.Unmarshal(bs, data); err != nil {
+			return err
+		}
+		found = true
+		return nil
+	})
+	q2 := time.Now()
+	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
+
+	if err == nil && found {
+		return nil
+	} else if err != nil {
+		c.logger.Printf("WARNING - query error: %v", err)
+	}
+
+	// Either the data is not available or it has expired.
+	s1 := time.Now()
+	err = c.fballc.Get(ctx, endpoint, data, params)
+	s2 := time.Now()
+	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
+
+	if err != nil {
+		return err
+	}
+
+	i1 := time.Now()
+	err = c.cache.Insert(ctx, endpoint, data, params)
+	i2 := time.Now()
+	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+	if err != nil {
+		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
+	}
+
+	return nil
+}
