@@ -135,4 +135,15 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(fix))
+
+	h2h, err := c.Head2Head(ctx, fball.Head2HeadParams{
+		H2H:    "147-144",
+		League: "71",
+		Season: "2020",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(h2h))
+
 }

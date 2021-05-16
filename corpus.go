@@ -172,6 +172,25 @@ func (c *Corpus) FixtureInfo(ctx context.Context, params FixtureInfoParams) (Fix
 	return fir, err
 }
 
+type Head2HeadParams struct {
+	H2H      string
+	Date     string
+	League   string
+	Season   string
+	Last     string
+	Next     string
+	From     string
+	To       string
+	Status   string
+	Timezone string
+}
+
+func (c *Corpus) Head2Head(ctx context.Context, params Head2HeadParams) (Head2HeadResponse, error) {
+	h2hr := Head2HeadResponse{}
+	err := c.get(ctx, EP_Head2Head, rp_OneMinute, toURLQueryString{params}, &h2hr)
+	return h2hr, err
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {

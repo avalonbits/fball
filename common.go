@@ -38,6 +38,7 @@ const (
 	EP_Standings   = "/standings"
 	EP_Round       = "/fixtures/rounds"
 	EP_FixtureInfo = "/fixtures"
+	EP_Head2Head   = "/fixtures/headtohead"
 )
 
 type urlQueryStringer interface {
