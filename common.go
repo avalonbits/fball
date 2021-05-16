@@ -28,17 +28,18 @@ import (
 )
 
 const (
-	EP_Timezone    = "/timezone"
-	EP_Countries   = "/countries"
-	EP_Season      = "/leagues/seasons"
-	EP_LeagueInfo  = "/leagues"
-	EP_TeamInfo    = "/teams"
-	EP_TeamStats   = "/teams/statistics"
-	EP_Venue       = "/venues"
-	EP_Standings   = "/standings"
-	EP_Round       = "/fixtures/rounds"
-	EP_FixtureInfo = "/fixtures"
-	EP_Head2Head   = "/fixtures/headtohead"
+	EP_Timezone     = "/timezone"
+	EP_Countries    = "/countries"
+	EP_Season       = "/leagues/seasons"
+	EP_LeagueInfo   = "/leagues"
+	EP_TeamInfo     = "/teams"
+	EP_TeamStats    = "/teams/statistics"
+	EP_Venue        = "/venues"
+	EP_Standings    = "/standings"
+	EP_Round        = "/fixtures/rounds"
+	EP_FixtureInfo  = "/fixtures"
+	EP_Head2Head    = "/fixtures/headtohead"
+	EP_FixtureStats = "/fixtures/statistics"
 )
 
 type urlQueryStringer interface {

@@ -303,7 +303,7 @@ type Head2HeadResponse struct {
 	Head2Head []Head2Head `json:"response"`
 }
 
-type StatisticsResponse struct {
+type FixtureStatsResponse struct {
 	CommonResponse
 
 	Statistics []Statistics `json:"response"`
@@ -312,9 +312,9 @@ type StatisticsResponse struct {
 type Statistics struct {
 	Team TeamData `json:"team"`
 	Info []struct {
-		Type  string `json:"type"`
-		Value int    `json:"value"`
-	}
+		Type  string      `json:"type"`
+		Value interface{} `json:"value"`
+	} `json:"statistics"`
 }
 
 type EventResponse struct {

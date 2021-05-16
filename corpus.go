@@ -191,6 +191,18 @@ func (c *Corpus) Head2Head(ctx context.Context, params Head2HeadParams) (Head2He
 	return h2hr, err
 }
 
+type FixtureStatsParams struct {
+	Fixture string
+	Team    string
+	Type    string
+}
+
+func (c *Corpus) FixtureStats(ctx context.Context, params FixtureStatsParams) (FixtureStatsResponse, error) {
+	fsr := FixtureStatsResponse{}
+	err := c.get(ctx, EP_FixtureStats, rp_OneMinute, toURLQueryString{params}, &fsr)
+	return fsr, err
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {

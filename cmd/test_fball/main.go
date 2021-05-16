@@ -146,4 +146,11 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(h2h))
 
+	fsr, err := c.FixtureStats(ctx, fball.FixtureStatsParams{
+		Fixture: "328362",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(fsr))
 }
