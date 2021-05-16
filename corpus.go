@@ -52,12 +52,17 @@ type CountryParams struct {
 	Search string
 }
 
-func (c *Corpus) Country(ctx context.Context, cp CountryParams) ([]CountryResponse, error) {
-	return c.getCountryResponse(ctx, EP_Countries, 1, tRange{}, rp_OneDay, toURLQueryString{cp})
+func (c *Corpus) Country(ctx context.Context, cp CountryParams) (CountryResponse, error) {
+	cr := CountryResponse{}
+	err := c.get(ctx, EP_Countries, rp_OneDay, toURLQueryString{cp}, &cr)
+	return cr, err
 }
 
-func (c *Corpus) Season(ctx context.Context) ([]SeasonResponse, error) {
-	return c.getSeasonResponse(ctx, EP_Season, 1, tRange{}, rp_OneDay, NoParams{})
+func (c *Corpus) Season(ctx context.Context) (SeasonResponse, error) {
+	sr := SeasonResponse{}
+	err := c.get(ctx, EP_Season, rp_OneDay, NoParams{}, &sr)
+	return sr, err
+
 }
 
 type LeagueInfoParams struct {
@@ -73,8 +78,10 @@ type LeagueInfoParams struct {
 	Last    string
 }
 
-func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) ([]LeagueInfoResponse, error) {
-	return c.getLeagueInfoResponse(ctx, EP_LeagueInfo, 1, tRange{}, rp_OneHour, toURLQueryString{params})
+func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) (LeagueInfoResponse, error) {
+	lir := LeagueInfoResponse{}
+	err := c.get(ctx, EP_LeagueInfo, rp_OneHour, toURLQueryString{params}, &lir)
+	return lir, err
 }
 
 type TeamInfoParams struct {
@@ -86,8 +93,10 @@ type TeamInfoParams struct {
 	Search  string
 }
 
-func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) ([]TeamInfoResponse, error) {
-	return c.getTeamInfoResponse(ctx, EP_TeamInfo, 1, tRange{}, rp_OneDay, toURLQueryString{params})
+func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) (TeamInfoResponse, error) {
+	tir := TeamInfoResponse{}
+	err := c.get(ctx, EP_TeamInfo, rp_OneDay, toURLQueryString{params}, &tir)
+	return tir, err
 }
 
 type TeamStatsParams struct {
@@ -97,8 +106,10 @@ type TeamStatsParams struct {
 	Date   string
 }
 
-func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) ([]TeamStatsResponse, error) {
-	return c.getTeamStatsResponse(ctx, EP_TeamStats, 1, tRange{}, rp_OneDay, toURLQueryString{params})
+func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) (TeamStatsResponse, error) {
+	tsr := TeamStatsResponse{}
+	err := c.get(ctx, EP_TeamStats, rp_OneDay, toURLQueryString{params}, &tsr)
+	return tsr, err
 }
 
 type VenueParams struct {
@@ -109,8 +120,10 @@ type VenueParams struct {
 	Search  string
 }
 
-func (c *Corpus) Venue(ctx context.Context, params VenueParams) ([]VenueResponse, error) {
-	return c.getVenueResponse(ctx, EP_Venue, 1, tRange{}, rp_OneDay, toURLQueryString{params})
+func (c *Corpus) Venue(ctx context.Context, params VenueParams) (VenueResponse, error) {
+	vr := VenueResponse{}
+	err := c.get(ctx, EP_Venue, rp_OneDay, toURLQueryString{params}, &vr)
+	return vr, err
 }
 
 type StandingsParams struct {
@@ -119,8 +132,10 @@ type StandingsParams struct {
 	Team   string
 }
 
-func (c *Corpus) Standings(ctx context.Context, params StandingsParams) ([]StandingsResponse, error) {
-	return c.getStandingsResponse(ctx, EP_Standings, 1, tRange{}, rp_OneHour, toURLQueryString{params})
+func (c *Corpus) Standings(ctx context.Context, params StandingsParams) (StandingsResponse, error) {
+	sr := StandingsResponse{}
+	err := c.get(ctx, EP_Standings, rp_OneHour, toURLQueryString{params}, &sr)
+	return sr, err
 }
 
 type RoundParams struct {
@@ -129,8 +144,10 @@ type RoundParams struct {
 	Current string
 }
 
-func (c *Corpus) Round(ctx context.Context, params RoundParams) ([]RoundResponse, error) {
-	return c.getRoundResponse(ctx, EP_Round, 1, tRange{}, rp_OneDay, toURLQueryString{params})
+func (c *Corpus) Round(ctx context.Context, params RoundParams) (RoundResponse, error) {
+	rr := RoundResponse{}
+	err := c.get(ctx, EP_Round, rp_OneDay, toURLQueryString{params}, &rr)
+	return rr, err
 }
 
 type FixtureInfoParams struct {
@@ -149,8 +166,10 @@ type FixtureInfoParams struct {
 	Timezone string
 }
 
-func (c *Corpus) FixtureInfo(ctx context.Context, params FixtureInfoParams) ([]FixtureInfoResponse, error) {
-	return c.getFixtureInfoResponse(ctx, EP_FixtureInfo, 1, tRange{}, rp_OneMinute, toURLQueryString{params})
+func (c *Corpus) FixtureInfo(ctx context.Context, params FixtureInfoParams) (FixtureInfoResponse, error) {
+	fir := FixtureInfoResponse{}
+	err := c.get(ctx, EP_FixtureInfo, rp_OneMinute, toURLQueryString{params}, &fir)
+	return fir, err
 }
 
 type refreshPolicy time.Duration
