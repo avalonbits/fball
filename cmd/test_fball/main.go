@@ -36,8 +36,9 @@ import (
 )
 
 var (
-	key = flag.String("key", "", "API key for football-api.")
-	db  = flag.String("db", "", "Path to sqlite database.")
+	key        = flag.String("key", "", "API key for football-api.")
+	db         = flag.String("db", "", "Path to sqlite database.")
+	allowStale = flag.Bool("allow_stale", false, "If true, will use stale data in case there is a network error.")
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 		fball.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
 		logger,
 		DB,
-	)
+	).WithStale(*allowStale)
 
 	ctx := context.Background()
 	tr, err := c.Timezone(ctx)

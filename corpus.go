@@ -27,9 +27,10 @@ import (
 )
 
 type Corpus struct {
-	logger *log.Logger
-	fballc *Client
-	cache  *cache
+	logger   *log.Logger
+	fballc   *Client
+	cache    *cache
+	useStale bool
 }
 
 func NewCorpus(fballc *Client, logger *log.Logger, dbs *sql.DB) *Corpus {
@@ -38,6 +39,11 @@ func NewCorpus(fballc *Client, logger *log.Logger, dbs *sql.DB) *Corpus {
 		fballc: fballc,
 		cache:  &cache{DB: dbs},
 	}
+}
+
+func (c *Corpus) WithStale(stale bool) *Corpus {
+	c.useStale = stale
+	return c
 }
 
 func (c *Corpus) Timezone(ctx context.Context) (TimezoneResponse, error) {
@@ -266,7 +272,11 @@ func (c *Corpus) get(
 	ctx context.Context, endpoint string, policy refreshPolicy, params urlQueryStringer, data Response) error {
 	q1 := time.Now()
 	found := false
-	err := c.cache.Query(ctx, endpoint, params, 1, policy.Range(q1), func(bs []byte) error {
+	pRange := tRange{}
+	if !c.useStale {
+		pRange = policy.Range(q1)
+	}
+	err := c.cache.Query(ctx, endpoint, params, 1, pRange, func(bs []byte) error {
 		if err := json.Unmarshal(bs, data); err != nil {
 			return err
 		}
@@ -276,7 +286,7 @@ func (c *Corpus) get(
 	q2 := time.Now()
 	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
 
-	if err == nil && found {
+	if err == nil && found && !c.useStale {
 		return nil
 	} else if err != nil {
 		c.logger.Printf("WARNING - query error: %v", err)
@@ -289,17 +299,21 @@ func (c *Corpus) get(
 	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
 
 	if err != nil {
-		return err
+		// There was an error in the api call. If we can, return stale data.
+		if !c.useStale {
+			return err
+		} else if found {
+			c.logger.Printf("WARNING - returning stale data because of api call error: %v", err)
+		}
+	} else {
+		i1 := time.Now()
+		err = c.cache.Insert(ctx, endpoint, data, params)
+		i2 := time.Now()
+		c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
+
+		if err != nil {
+			c.logger.Printf("ERROR - unable to write country to cache: %v", err)
+		}
 	}
-
-	i1 := time.Now()
-	err = c.cache.Insert(ctx, endpoint, data, params)
-	i2 := time.Now()
-	c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
-
-	if err != nil {
-		c.logger.Printf("ERROR - unable to write country to cache: %v", err)
-	}
-
 	return nil
 }

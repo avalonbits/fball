@@ -89,7 +89,7 @@ func (c *Client) Get(ctx context.Context, endpoint string, data Response, params
 	req.Header.Set("X-RapidAPI-Key", c.key)
 	resp, err := c.doer.Do(req)
 	if err != nil {
-		log.Println(err)
+		c.logger.Println(err)
 		return err
 	}
 	defer resp.Body.Close()
