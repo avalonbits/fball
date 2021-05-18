@@ -45,7 +45,7 @@ func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "fball - ", log.LstdFlags|log.Lshortfile)
-	limit := ratelimit.New(10, ratelimit.Per(time.Minute))
+	limit := ratelimit.New(10, ratelimit.Per(time.Minute), ratelimit.WithSlack(10))
 	DB, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&mode=rwc&_journal_mode=WAL", *db))
 	if err != nil {
 		logger.Fatal(err)
