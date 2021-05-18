@@ -229,6 +229,17 @@ func (c *Corpus) Lineup(ctx context.Context, params LineupParams) (LineupRespons
 	return lr, err
 }
 
+type PlayerStatsParams struct {
+	Fixture string
+	Team    string
+}
+
+func (c *Corpus) PlayerStats(ctx context.Context, params PlayerStatsParams) (PlayerStatsResponse, error) {
+	psr := PlayerStatsResponse{}
+	err := c.get(ctx, EP_PlayerStats, rp_OneMinute, toURLQueryString{params}, &psr)
+	return psr, err
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {

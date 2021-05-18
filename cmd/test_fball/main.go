@@ -169,4 +169,12 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(lr))
+
+	psr, err := c.PlayerStats(ctx, fball.PlayerStatsParams{
+		Fixture: "328362",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(psr))
 }
