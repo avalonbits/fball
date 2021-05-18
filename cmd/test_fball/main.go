@@ -153,4 +153,12 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(fsr))
+
+	er, err := c.Event(ctx, fball.EventParams{
+		Fixture: "328362",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(er))
 }

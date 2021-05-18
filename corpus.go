@@ -203,6 +203,19 @@ func (c *Corpus) FixtureStats(ctx context.Context, params FixtureStatsParams) (F
 	return fsr, err
 }
 
+type EventParams struct {
+	Fixture string
+	Team    string
+	Player  string
+	Type    string
+}
+
+func (c *Corpus) Event(ctx context.Context, params EventParams) (EventResponse, error) {
+	er := EventResponse{}
+	err := c.get(ctx, EP_FixtureEvent, rp_OneMinute, toURLQueryString{params}, &er)
+	return er, err
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
