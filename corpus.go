@@ -216,6 +216,19 @@ func (c *Corpus) Event(ctx context.Context, params EventParams) (EventResponse, 
 	return er, err
 }
 
+type LineupParams struct {
+	Fixture string
+	Team    string
+	Player  string
+	Type    string
+}
+
+func (c *Corpus) Lineup(ctx context.Context, params LineupParams) (LineupResponse, error) {
+	lr := LineupResponse{}
+	err := c.get(ctx, EP_Lineup, rp_15Minutes, toURLQueryString{params}, &lr)
+	return lr, err
+}
+
 type refreshPolicy time.Duration
 
 func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
@@ -232,6 +245,7 @@ func (rp refreshPolicy) Range(now time.Time) tRange {
 
 const (
 	rp_OneMinute = refreshPolicy(time.Minute)
+	rp_15Minutes = refreshPolicy(15 * time.Minute)
 	rp_OneHour   = refreshPolicy(time.Hour)
 	rp_OneDay    = refreshPolicy(86400 * time.Second)
 	rp_Infinite  = refreshPolicy(1<<63 - 1)

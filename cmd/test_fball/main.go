@@ -161,4 +161,12 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Println(pretty.Sprint(er))
+
+	lr, err := c.Lineup(ctx, fball.LineupParams{
+		Fixture: "328362",
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Println(pretty.Sprint(lr))
 }
