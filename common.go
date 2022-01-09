@@ -77,7 +77,11 @@ func (r tRange) IsZero() bool {
 }
 
 type toURLQueryString struct {
-	data interface{}
+	data any
+}
+
+func WrapURLQueryString(data any) urlQueryStringer {
+	return toURLQueryString{data}
 }
 
 func (tuqs toURLQueryString) urlQueryString() string {

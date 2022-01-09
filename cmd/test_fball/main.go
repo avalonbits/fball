@@ -65,7 +65,8 @@ func main() {
 	}
 	logger.Println(pretty.Sprint(tr))
 
-	cr, err := c.Country(ctx, fball.CountryParams{})
+	cr := fball.CountryResponse{}
+	err = fball.Get(ctx, c, fball.EP_Countries, fball.RP_OneDay, fball.WrapURLQueryString(fball.CountryParams{}), &cr)
 	if err != nil {
 		logger.Fatal(err)
 	}
