@@ -45,15 +45,7 @@ const (
 	EP_PlayerStats  = "/fixtures/players"
 )
 
-type urlQueryStringer interface {
-	urlQueryString() string
-}
-
-type NoParams struct{}
-
-func (np NoParams) urlQueryString() string {
-	return ""
-}
+const NoParams = ""
 
 type tRange struct {
 	Latest   time.Time
@@ -76,17 +68,9 @@ func (r tRange) IsZero() bool {
 	return r.Latest.IsZero() && r.Earliest.IsZero()
 }
 
-type toURLQueryString struct {
-	data any
-}
-
-func WrapURLQueryString(data any) urlQueryStringer {
-	return toURLQueryString{data}
-}
-
-func (tuqs toURLQueryString) urlQueryString() string {
-	v := reflect.ValueOf(tuqs.data)
-	t := reflect.TypeOf(tuqs.data)
+func ToURLQueryString(data any) string {
+	v := reflect.ValueOf(data)
+	t := reflect.TypeOf(data)
 	if v.Kind() != reflect.Struct {
 		panic(fmt.Errorf("expected a struct, got %v", v.Kind()))
 	}

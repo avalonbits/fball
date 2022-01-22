@@ -36,7 +36,7 @@ var insertSQL = `
 INSERT INTO RequestCache(Endpoint, Params, Timestamp, Response)
 				  VALUES(?, ?, ?, ?);`
 
-func (c *cache) Insert(ctx context.Context, endpoint string, data Response, params urlQueryStringer) error {
+func (c *cache) Insert(ctx context.Context, endpoint string, queryStr string, data Response) error {
 	return transact(ctx, c.DB, func(tx *sql.Tx) error {
 		stmt, err := tx.PrepareContext(ctx, insertSQL)
 		if err != nil {
@@ -58,13 +58,12 @@ func (c *cache) Insert(ctx context.Context, endpoint string, data Response, para
 			return err
 		}
 
-		res, err := stmt.ExecContext(ctx, endpoint, params.urlQueryString(), data.When(), buf.Bytes())
+		res, err := stmt.ExecContext(ctx, endpoint, queryStr, data.When(), buf.Bytes())
 		if err != nil {
 			return err
 		}
 		_, err = res.RowsAffected()
 		return err
-
 	})
 }
 
@@ -86,7 +85,7 @@ SELECT Response from RequestCache
 type queryCB func([]byte) error
 
 func (c *cache) Query(
-	ctx context.Context, endpoint string, params urlQueryStringer, max int, r tRange, cb queryCB) error {
+	ctx context.Context, endpoint string, queryStr string, max int, r tRange, cb queryCB) error {
 	if c == nil || c.DB == nil {
 		return nil
 	}
@@ -103,7 +102,7 @@ func (c *cache) Query(
 		defer stmt.Close()
 
 		top, bottom := r.UnixNano()
-		rows, err := stmt.QueryContext(ctx, endpoint, params.urlQueryString(), top, bottom, max)
+		rows, err := stmt.QueryContext(ctx, endpoint, queryStr, top, bottom, max)
 		if err != nil {
 			return err
 		}

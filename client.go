@@ -62,7 +62,7 @@ type Response interface {
 
 const base = "https://v3.football.api-sports.io"
 
-func (c *Client) Get(ctx context.Context, endpoint string, data Response, params urlQueryStringer) error {
+func (c *Client) Get(ctx context.Context, endpoint string, queryStr string, data Response) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
 	}
@@ -71,10 +71,9 @@ func (c *Client) Get(ctx context.Context, endpoint string, data Response, params
 	}
 
 	url := base + endpoint
-	qstr := params.urlQueryString()
-	if qstr != "" {
+	if queryStr != "" {
 		url += "?"
-		url += qstr
+		url += queryStr
 	}
 
 	c.logger.Println("GET", url)

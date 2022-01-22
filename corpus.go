@@ -48,7 +48,7 @@ func (c *Corpus) WithStale(stale bool) *Corpus {
 
 func (c *Corpus) Timezone(ctx context.Context) (TimezoneResponse, error) {
 	tr := TimezoneResponse{}
-	err := c.get(ctx, EP_Timezone, RP_Infinite, NoParams{}, &tr)
+	err := c.get(ctx, EP_Timezone, NoParams, rp_Infinite, &tr)
 	return tr, err
 }
 
@@ -60,13 +60,13 @@ type CountryParams struct {
 
 func (c *Corpus) Country(ctx context.Context, cp CountryParams) (CountryResponse, error) {
 	cr := CountryResponse{}
-	err := c.get(ctx, EP_Countries, RP_OneDay, toURLQueryString{cp}, &cr)
+	err := c.get(ctx, EP_Countries, ToURLQueryString(cp), rp_OneDay, &cr)
 	return cr, err
 }
 
 func (c *Corpus) Season(ctx context.Context) (SeasonResponse, error) {
 	sr := SeasonResponse{}
-	err := c.get(ctx, EP_Season, RP_OneDay, NoParams{}, &sr)
+	err := c.get(ctx, EP_Season, NoParams, rp_OneDay, &sr)
 	return sr, err
 
 }
@@ -86,7 +86,7 @@ type LeagueInfoParams struct {
 
 func (c *Corpus) LeagueInfo(ctx context.Context, params LeagueInfoParams) (LeagueInfoResponse, error) {
 	lir := LeagueInfoResponse{}
-	err := c.get(ctx, EP_LeagueInfo, RP_OneHour, toURLQueryString{params}, &lir)
+	err := c.get(ctx, EP_LeagueInfo, ToURLQueryString(params), rp_OneHour, &lir)
 	return lir, err
 }
 
@@ -101,7 +101,7 @@ type TeamInfoParams struct {
 
 func (c *Corpus) TeamInfo(ctx context.Context, params TeamInfoParams) (TeamInfoResponse, error) {
 	tir := TeamInfoResponse{}
-	err := c.get(ctx, EP_TeamInfo, RP_OneDay, toURLQueryString{params}, &tir)
+	err := c.get(ctx, EP_TeamInfo, ToURLQueryString(params), rp_OneDay, &tir)
 	return tir, err
 }
 
@@ -114,7 +114,7 @@ type TeamStatsParams struct {
 
 func (c *Corpus) TeamStats(ctx context.Context, params TeamStatsParams) (TeamStatsResponse, error) {
 	tsr := TeamStatsResponse{}
-	err := c.get(ctx, EP_TeamStats, RP_OneDay, toURLQueryString{params}, &tsr)
+	err := c.get(ctx, EP_TeamStats, ToURLQueryString(params), rp_OneDay, &tsr)
 	return tsr, err
 }
 
@@ -128,7 +128,7 @@ type VenueParams struct {
 
 func (c *Corpus) Venue(ctx context.Context, params VenueParams) (VenueResponse, error) {
 	vr := VenueResponse{}
-	err := c.get(ctx, EP_Venue, RP_OneDay, toURLQueryString{params}, &vr)
+	err := c.get(ctx, EP_Venue, ToURLQueryString(params), rp_OneDay, &vr)
 	return vr, err
 }
 
@@ -140,7 +140,7 @@ type StandingsParams struct {
 
 func (c *Corpus) Standings(ctx context.Context, params StandingsParams) (StandingsResponse, error) {
 	sr := StandingsResponse{}
-	err := c.get(ctx, EP_Standings, RP_OneHour, toURLQueryString{params}, &sr)
+	err := c.get(ctx, EP_Standings, ToURLQueryString(params), rp_OneHour, &sr)
 	return sr, err
 }
 
@@ -152,7 +152,7 @@ type RoundParams struct {
 
 func (c *Corpus) Round(ctx context.Context, params RoundParams) (RoundResponse, error) {
 	rr := RoundResponse{}
-	err := c.get(ctx, EP_Round, RP_OneDay, toURLQueryString{params}, &rr)
+	err := c.get(ctx, EP_Round, ToURLQueryString(params), rp_OneDay, &rr)
 	return rr, err
 }
 
@@ -174,7 +174,7 @@ type FixtureInfoParams struct {
 
 func (c *Corpus) FixtureInfo(ctx context.Context, params FixtureInfoParams) (FixtureInfoResponse, error) {
 	fir := FixtureInfoResponse{}
-	err := c.get(ctx, EP_FixtureInfo, RP_OneMinute, toURLQueryString{params}, &fir)
+	err := c.get(ctx, EP_FixtureInfo, ToURLQueryString(params), rp_OneMinute, &fir)
 	return fir, err
 }
 
@@ -193,7 +193,7 @@ type Head2HeadParams struct {
 
 func (c *Corpus) Head2Head(ctx context.Context, params Head2HeadParams) (Head2HeadResponse, error) {
 	h2hr := Head2HeadResponse{}
-	err := c.get(ctx, EP_Head2Head, RP_OneMinute, toURLQueryString{params}, &h2hr)
+	err := c.get(ctx, EP_Head2Head, ToURLQueryString(params), rp_OneMinute, &h2hr)
 	return h2hr, err
 }
 
@@ -205,7 +205,7 @@ type FixtureStatsParams struct {
 
 func (c *Corpus) FixtureStats(ctx context.Context, params FixtureStatsParams) (FixtureStatsResponse, error) {
 	fsr := FixtureStatsResponse{}
-	err := c.get(ctx, EP_FixtureStats, RP_OneMinute, toURLQueryString{params}, &fsr)
+	err := c.get(ctx, EP_FixtureStats, ToURLQueryString(params), rp_OneMinute, &fsr)
 	return fsr, err
 }
 
@@ -218,7 +218,7 @@ type EventParams struct {
 
 func (c *Corpus) Event(ctx context.Context, params EventParams) (EventResponse, error) {
 	er := EventResponse{}
-	err := c.get(ctx, EP_FixtureEvent, RP_OneMinute, toURLQueryString{params}, &er)
+	err := c.get(ctx, EP_FixtureEvent, ToURLQueryString(params), rp_OneMinute, &er)
 	return er, err
 }
 
@@ -231,7 +231,7 @@ type LineupParams struct {
 
 func (c *Corpus) Lineup(ctx context.Context, params LineupParams) (LineupResponse, error) {
 	lr := LineupResponse{}
-	err := c.get(ctx, EP_Lineup, RP_15Minutes, toURLQueryString{params}, &lr)
+	err := c.get(ctx, EP_Lineup, ToURLQueryString(params), rp_15Minutes, &lr)
 	return lr, err
 }
 
@@ -242,7 +242,7 @@ type PlayerStatsParams struct {
 
 func (c *Corpus) PlayerStats(ctx context.Context, params PlayerStatsParams) (PlayerStatsResponse, error) {
 	psr := PlayerStatsResponse{}
-	err := c.get(ctx, EP_PlayerStats, RP_OneMinute, toURLQueryString{params}, &psr)
+	err := c.get(ctx, EP_PlayerStats, ToURLQueryString(params), rp_OneMinute, &psr)
 	return psr, err
 }
 
@@ -252,7 +252,7 @@ func (rp refreshPolicy) Valid(now time.Time, tsnano int64) bool {
 	return now.UTC().Sub(time.Unix(0, tsnano)) < time.Duration(rp)
 }
 
-func (rp refreshPolicy) Range(now time.Time) tRange {
+func (rp refreshPolicy) Latest(now time.Time) tRange {
 	now = now.UTC()
 	return tRange{
 		Latest:   now,
@@ -261,72 +261,22 @@ func (rp refreshPolicy) Range(now time.Time) tRange {
 }
 
 const (
-	RP_OneMinute = refreshPolicy(time.Minute)
-	RP_15Minutes = refreshPolicy(15 * time.Minute)
-	RP_OneHour   = refreshPolicy(time.Hour)
-	RP_OneDay    = refreshPolicy(86400 * time.Second)
-	RP_Infinite  = refreshPolicy(1<<63 - 1)
+	rp_OneMinute = refreshPolicy(time.Minute)
+	rp_15Minutes = refreshPolicy(15 * time.Minute)
+	rp_OneHour   = refreshPolicy(time.Hour)
+	rp_OneDay    = refreshPolicy(86400 * time.Second)
+	rp_Infinite  = refreshPolicy(1<<63 - 1)
 )
 
-func Get[T Response](
-	ctx context.Context, c *Corpus, endpoint string, policy refreshPolicy, params urlQueryStringer, data T) error {
-	q1 := time.Now()
-	found := false
-	pRange := tRange{}
-	if !c.useStale {
-		pRange = policy.Range(q1)
-	}
-	err := c.cache.Query(ctx, endpoint, params, 1, pRange, func(bs []byte) error {
-		if err := json.Unmarshal(bs, data); err != nil {
-			return err
-		}
-		found = true
-		return nil
-	})
-	q2 := time.Now()
-	c.logger.Printf("INFO - %q query time: %dms", endpoint, q2.Sub(q1)/time.Millisecond)
-
-	if err == nil && found && !c.useStale {
-		return nil
-	} else if err != nil {
-		c.logger.Printf("WARNING - query error: %v", err)
-	}
-
-	// Either the data is not available or it has expired.
-	s1 := time.Now()
-	err = c.fballc.Get(ctx, endpoint, data, params)
-	s2 := time.Now()
-	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
-
-	if err != nil {
-		// There was an error in the api call. If we can, return stale data.
-		if !c.useStale {
-			return err
-		} else if found {
-			c.logger.Printf("WARNING - returning stale data because of api call error: %v", err)
-		}
-	} else {
-		i1 := time.Now()
-		err = c.cache.Insert(ctx, endpoint, data, params)
-		i2 := time.Now()
-		c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
-
-		if err != nil {
-			c.logger.Printf("ERROR - unable to write country to cache: %v", err)
-		}
-	}
-	return nil
-}
-
 func (c *Corpus) get(
-	ctx context.Context, endpoint string, policy refreshPolicy, params urlQueryStringer, data Response) error {
+	ctx context.Context, endpoint string, queryStr string, policy refreshPolicy, data Response) error {
 	q1 := time.Now()
 	found := false
 	pRange := tRange{}
 	if !c.useStale {
-		pRange = policy.Range(q1)
+		pRange = policy.Latest(q1)
 	}
-	err := c.cache.Query(ctx, endpoint, params, 1, pRange, func(bs []byte) error {
+	err := c.cache.Query(ctx, endpoint, queryStr, 1, pRange, func(bs []byte) error {
 		if err := json.Unmarshal(bs, data); err != nil {
 			return err
 		}
@@ -344,7 +294,7 @@ func (c *Corpus) get(
 
 	// Either the data is not available or it has expired.
 	s1 := time.Now()
-	err = c.fballc.Get(ctx, endpoint, data, params)
+	err = c.fballc.Get(ctx, endpoint, queryStr, data)
 	s2 := time.Now()
 	c.logger.Printf("INFO - %q api call time: %dms", endpoint, s2.Sub(s1)/time.Millisecond)
 
@@ -357,7 +307,7 @@ func (c *Corpus) get(
 		}
 	} else {
 		i1 := time.Now()
-		err = c.cache.Insert(ctx, endpoint, data, params)
+		err = c.cache.Insert(ctx, endpoint, queryStr, data)
 		i2 := time.Now()
 		c.logger.Printf("INFO - %q insert time: %dms", endpoint, i2.Sub(i1)/time.Millisecond)
 
