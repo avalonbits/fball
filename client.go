@@ -27,6 +27,7 @@ import (
 	"time"
 )
 
+// Doer is an interface for perfomring http requests.
 type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
@@ -35,6 +36,7 @@ type limiter interface {
 	Take() time.Time
 }
 
+// Client is an api-football.com client.
 type Client struct {
 	key    string
 	doer   Doer
@@ -42,6 +44,9 @@ type Client struct {
 	logger *log.Logger
 }
 
+// NewClient creates an api-football.com client. The key is the one provided by the
+// service when you register it. limit will rate limit any request and if no logger
+// is provided, a default logger is used.
 func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client {
 	if logger == nil {
 		logger = log.Default()
@@ -54,14 +59,22 @@ func NewClient(key string, limit limiter, doer Doer, logger *log.Logger) *Client
 	}
 }
 
+// Response is an interface for api-football.com responses.
 type Response interface {
+	// Err returns the error from the response, if any.
 	Err() error
-	SetWhen(int64)
+
+	// When returns the timestamp for the response.
 	When() int64
+
+	// setWhen sets the timestamp for the response.
+	setWhen(int64)
 }
 
 const base = "https://v3.football.api-sports.io"
 
+// Get will perform a GET request against the api-football service.
+// The response is returned in the data out param.
 func (c *Client) Get(ctx context.Context, endpoint string, queryStr string, data Response) error {
 	if data == nil {
 		return fmt.Errorf("inalid data: must be non-nil")
@@ -97,7 +110,7 @@ func (c *Client) Get(ctx context.Context, endpoint string, queryStr string, data
 	if err := dec.Decode(data); err != nil {
 		return err
 	}
-	data.SetWhen(now)
+	data.setWhen(now)
 
 	return data.Err()
 }

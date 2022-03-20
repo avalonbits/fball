@@ -25,18 +25,66 @@ import (
 	"github.com/kr/pretty"
 )
 
+type commonResponse struct {
+	Get        string      `json:"get"`
+	Parameters interface{} `json:"parameters"`
+	Errors     interface{} `json:"errors"`
+	Results    int         `json:"results"`
+	Paging     PagingToken `json:"paging"`
+	Timestamp  int64
+}
+
+func (cr *commonResponse) setWhen(timestamp int64) {
+	cr.Timestamp = timestamp
+}
+
+func (cr commonResponse) When() int64 {
+	return cr.Timestamp
+}
+
+func (cr commonResponse) Err() error {
+	if cr.Errors == nil {
+		return nil
+	}
+
+	// If there are no errros, Errors gets parsed as a []interface. So let's check that first.
+	nErrs, ok := cr.Errors.([]interface{})
+	if ok {
+		if len(nErrs) != 0 {
+			return fmt.Errorf("%s", pretty.Sprint(nErrs))
+		} else {
+			return nil
+		}
+	}
+
+	// Now check if actual errors were returned.
+	errs, ok := cr.Errors.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("%s", pretty.Sprint(errs))
+	}
+	if len(errs) == 0 {
+		return nil
+	}
+
+	errList := make([]string, 0, len(errs))
+	for k, v := range errs {
+		errList = append(errList, fmt.Sprintf("\t%q: %q", k, v))
+	}
+	return fmt.Errorf("\nerrors:\n%s\n", strings.Join(errList, "\n"))
+}
+
 type TimezoneResponse struct {
-	CommonResponse
+	commonResponse
 	Timezone []string `json:"response"`
 }
 
 type RoundResponse struct {
-	CommonResponse
+	commonResponse
 	Rounds []string `json:"response"`
 }
 
 type CountryResponse struct {
-	CommonResponse
+	commonResponse
 	Country []Country `json:"response"`
 }
 
@@ -47,12 +95,12 @@ type Country struct {
 }
 
 type SeasonResponse struct {
-	CommonResponse
+	commonResponse
 	Season []int `json:"response"`
 }
 
 type LeagueInfoResponse struct {
-	CommonResponse
+	commonResponse
 	LeagueInfo []LeagueInfo `json:"response"`
 }
 
@@ -110,12 +158,12 @@ type League struct {
 }
 
 type TeamInfoResponse struct {
-	CommonResponse
+	commonResponse
 	TeamInfo []TeamInfo `json:"response"`
 }
 
 type VenueResponse struct {
-	CommonResponse
+	commonResponse
 	Venue []Venue `json:"response"`
 }
 
@@ -146,7 +194,7 @@ type Venue struct {
 }
 
 type StandingsResponse struct {
-	CommonResponse
+	commonResponse
 	Standings []struct {
 		League League `json:"league"`
 	} `json:"response"`
@@ -164,7 +212,7 @@ type RankTotals struct {
 }
 
 type TeamStatsResponse struct {
-	CommonResponse
+	commonResponse
 
 	TeamStats struct {
 		League   League   `json:"league"`
@@ -248,7 +296,7 @@ type TotalPercent struct {
 }
 
 type FixtureInfoResponse struct {
-	CommonResponse
+	commonResponse
 
 	FixtureInfo []Head2Head `json:"response"`
 }
@@ -298,13 +346,13 @@ type Fixture struct {
 }
 
 type Head2HeadResponse struct {
-	CommonResponse
+	commonResponse
 
 	Head2Head []Head2Head `json:"response"`
 }
 
 type FixtureStatsResponse struct {
-	CommonResponse
+	commonResponse
 
 	Statistics []Statistics `json:"response"`
 }
@@ -318,7 +366,7 @@ type Statistics struct {
 }
 
 type EventResponse struct {
-	CommonResponse
+	commonResponse
 
 	Event []Event `json:"response"`
 }
@@ -344,7 +392,7 @@ type Player struct {
 }
 
 type LineupResponse struct {
-	CommonResponse
+	commonResponse
 
 	Lineup []Lineup `json:"response"`
 }
@@ -366,7 +414,7 @@ type Lineup struct {
 }
 
 type PlayerStatsResponse struct {
-	CommonResponse
+	commonResponse
 
 	PlayerStats []PlayerStats `json:"response"`
 }
@@ -431,54 +479,6 @@ type PlayerStats struct {
 			} `json:"penalty"`
 		} `json:"statistics"`
 	} `json:"players"`
-}
-
-type CommonResponse struct {
-	Get        string      `json:"get"`
-	Parameters interface{} `json:"parameters"`
-	Errors     interface{} `json:"errors"`
-	Results    int         `json:"results"`
-	Paging     PagingToken `json:"paging"`
-	Timestamp  int64
-}
-
-func (cr *CommonResponse) SetWhen(timestamp int64) {
-	cr.Timestamp = timestamp
-}
-
-func (cr CommonResponse) When() int64 {
-	return cr.Timestamp
-}
-
-func (cr CommonResponse) Err() error {
-	if cr.Errors == nil {
-		return nil
-	}
-
-	// If there are no errros, Errors gets parsed as a []interface. So let's check that first.
-	nErrs, ok := cr.Errors.([]interface{})
-	if ok {
-		if len(nErrs) != 0 {
-			return fmt.Errorf("%s", pretty.Sprint(nErrs))
-		} else {
-			return nil
-		}
-	}
-
-	// Now check if actual errors were returned.
-	errs, ok := cr.Errors.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("%s", pretty.Sprint(errs))
-	}
-	if len(errs) == 0 {
-		return nil
-	}
-
-	errList := make([]string, 0, len(errs))
-	for k, v := range errs {
-		errList = append(errList, fmt.Sprintf("\t%q: %q", k, v))
-	}
-	return fmt.Errorf("\nerrors:\n%s\n", strings.Join(errList, "\n"))
 }
 
 type PagingToken struct {
