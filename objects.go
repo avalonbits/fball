@@ -301,22 +301,19 @@ type FixtureInfoResponse struct {
 	FixtureInfo []Head2Head `json:"response"`
 }
 
+type H2HTeam struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Logo   string `json:"logo"`
+	Winner bool   `json:"winner"`
+}
+
 type Head2Head struct {
 	Fixture Fixture `json:"fixture"`
 	League  League  `json:"league"`
 	Teams   struct {
-		Home struct {
-			ID     int    `json:"id"`
-			Name   string `json:"name"`
-			Logo   string `json:"logo"`
-			Winner bool   `json:"winner"`
-		} `json:"home"`
-		Away struct {
-			ID     int    `json:"id"`
-			Name   string `json:"name"`
-			Logo   string `json:"logo"`
-			Winner bool   `json:"winner"`
-		} `json:"away"`
+		Home H2HTeam `json:"home"`
+		Away H2HTeam `json:"away"`
 	} `json:"teams"`
 	Goals Totals `json:"goals"`
 	Score struct {
