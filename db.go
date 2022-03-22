@@ -26,7 +26,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
+	_ "embed"
 )
+
+//go:embed schema.sql
+var FballCacheSchema []byte
 
 type cache struct {
 	DB *sql.DB
