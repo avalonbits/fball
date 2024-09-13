@@ -20,76 +20,56 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/avalonbits/fball"
 	"github.com/kr/pretty"
-	"go.uber.org/ratelimit"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
-	key        = flag.String("key", "", "API key for football-api.")
-	db         = flag.String("db", "", "Path to sqlite database.")
-	allowStale = flag.Bool("allow_stale", false, "If true, will use stale data in case there is a network error.")
+	key = flag.String("key", "", "API key for football-api.")
 )
 
 func main() {
 	flag.Parse()
 
-	logger := log.New(os.Stderr, "fball - ", log.LstdFlags|log.Lshortfile)
-	limit := ratelimit.New(10, ratelimit.Per(time.Minute), ratelimit.WithSlack(10))
-	DB, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&mode=rwc&_journal_mode=WAL", *db))
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer DB.Close()
-
-	c := fball.NewCorpus(
-		fball.NewClient(*key, limit, &http.Client{Timeout: 10 * time.Second}, logger),
-		logger,
-		DB,
-	).WithStale(*allowStale)
+	c := fball.NewClient(*key, &http.Client{Timeout: 10 * time.Second})
 
 	ctx := context.Background()
 	tr, err := c.Timezone(ctx)
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(tr))
+	fmt.Println(pretty.Sprint(tr))
 
 	cr, err := c.Country(ctx, fball.CountryParams{})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(cr))
+	fmt.Println(pretty.Sprint(cr))
 
 	sr, err := c.Season(ctx)
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(sr))
+	fmt.Println(pretty.Sprint(sr))
 
 	lir, err := c.LeagueInfo(ctx, fball.LeagueInfoParams{})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(lir))
+	fmt.Println(pretty.Sprint(lir))
 
 	tir, err := c.TeamInfo(ctx, fball.TeamInfoParams{
 		Country: "Brazil",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(tir))
+	fmt.Println(pretty.Sprint(tir))
 
 	tsr, err := c.TeamStats(ctx, fball.TeamStatsParams{
 		League: "71",
@@ -97,26 +77,26 @@ func main() {
 		Team:   "123",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(tsr))
+	fmt.Println(pretty.Sprint(tsr))
 
 	vr, err := c.Venue(ctx, fball.VenueParams{
 		Country: "Brazil",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(vr))
+	fmt.Println(pretty.Sprint(vr))
 
 	sp, err := c.Standings(ctx, fball.StandingsParams{
 		League: "71",
 		Season: "2020",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(sp))
+	fmt.Println(pretty.Sprint(sp))
 
 	rn, err := c.Round(ctx, fball.RoundParams{
 		League:  "71",
@@ -124,18 +104,18 @@ func main() {
 		Current: "false",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(rn))
+	fmt.Println(pretty.Sprint(rn))
 
 	fix, err := c.FixtureInfo(ctx, fball.FixtureInfoParams{
 		League: "71",
 		Season: "2020",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(fix))
+	fmt.Println(pretty.Sprint(fix))
 
 	h2h, err := c.Head2Head(ctx, fball.Head2HeadParams{
 		H2H:    "147-144",
@@ -143,39 +123,39 @@ func main() {
 		Season: "2020",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(h2h))
+	fmt.Println(pretty.Sprint(h2h))
 
 	fsr, err := c.FixtureStats(ctx, fball.FixtureStatsParams{
 		Fixture: "328362",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(fsr))
+	fmt.Println(pretty.Sprint(fsr))
 
 	er, err := c.Event(ctx, fball.EventParams{
 		Fixture: "328362",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(er))
+	fmt.Println(pretty.Sprint(er))
 
 	lr, err := c.Lineup(ctx, fball.LineupParams{
 		Fixture: "328362",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(lr))
+	fmt.Println(pretty.Sprint(lr))
 
 	psr, err := c.PlayerStats(ctx, fball.PlayerStatsParams{
 		Fixture: "328362",
 	})
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
-	logger.Println(pretty.Sprint(psr))
+	fmt.Println(pretty.Sprint(psr))
 }

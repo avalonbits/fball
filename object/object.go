@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fball
+package object
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ type commonResponse struct {
 	Timestamp  int64
 }
 
-func (cr *commonResponse) setWhen(timestamp int64) {
+func (cr *commonResponse) SetWhen(timestamp int64) {
 	cr.Timestamp = timestamp
 }
 
