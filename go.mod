@@ -1,6 +1,6 @@
 module github.com/avalonbits/fball
 
-go 1.18
+go 1.23
 
 require (
 	github.com/kr/pretty v0.3.0
