@@ -322,6 +322,10 @@ type Head2Head struct {
 		Extratime Totals `json:"extratime"`
 		Penalty   Totals `json:"penalty"`
 	} `json:"score"`
+	Events     []Event       `json:"events"`
+	Statistics []Statistics  `json:"statistics"`
+	Lineups    []Lineup      `json:"lineups"`
+	Players    []PlayerStats `json:"players"`
 }
 
 type Fixture struct {
